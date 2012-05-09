@@ -8,7 +8,7 @@ public enum BasicRelation {
 	// parent is the common ancestor
 	ParentChild (new Relation(new CommonAncestor(1, 0))),
 	
-	// shares two parents
+	// share two parents
 	Siblings (new Relation(new CommonAncestor(1,1), new CommonAncestor(1,1))),
 	
 	// share one parent
@@ -24,15 +24,20 @@ public enum BasicRelation {
 	// share two ancestors, each a parent/grandparent
 	UncleNephew (new Relation(new CommonAncestor(2, 1), new CommonAncestor(2, 1))),
 	
-	// shares two great-grandparents
+	// share two great-grandparents
 	SecondCousins(new Relation(new CommonAncestor(3, 3), new CommonAncestor(3,3))),
 	
 	// great-grandparent is the ancestor
 	GreatGrandparentGreatGrandchild (new Relation(new CommonAncestor(3, 0))),
 	
-	// or GreatAunt, to be gender-neutral...
+	// or GreatAuntGreatNiece, to be gender-neutral...
 	// share two ancestors, each a grandparent/great-grandparent
-	GreatUncle (new Relation(new CommonAncestor(3, 2), new CommonAncestor(3, 2)));
+	GreatUncleGreatNephew (new Relation(new CommonAncestor(3, 2), new CommonAncestor(3, 2))),
+	
+	// Rare case where two siblings from one family each marry two siblings from another family,
+	// so their kids share all 4 grandparents
+	DoubleFirstCousins (new Relation(new CommonAncestor(2, 2), new CommonAncestor(2, 2), 
+			new CommonAncestor(2, 2) , new CommonAncestor(2, 2))),
 	;
 	
 	private Relation relation;

@@ -3,7 +3,7 @@ package com.nolanlawson.relatedness;
 import static com.nolanlawson.relatedness.BasicRelation.Cousins;
 import static com.nolanlawson.relatedness.BasicRelation.GrandparentGrandchild;
 import static com.nolanlawson.relatedness.BasicRelation.GreatGrandparentGreatGrandchild;
-import static com.nolanlawson.relatedness.BasicRelation.GreatUncle;
+import static com.nolanlawson.relatedness.BasicRelation.GreatUncleGreatNephew;
 import static com.nolanlawson.relatedness.BasicRelation.HalfSiblings;
 import static com.nolanlawson.relatedness.BasicRelation.ParentChild;
 import static com.nolanlawson.relatedness.BasicRelation.SecondCousins;
@@ -39,7 +39,8 @@ public class RelatednessTest {
 		testRelatedness(3, 0.125, GreatGrandparentGreatGrandchild);
 		testRelatedness(4, 0.125, Cousins);
 		testRelatedness(6, 0.03125, SecondCousins);
-		testRelatedness(5, 0.0625, GreatUncle);
+		testRelatedness(5, 0.0625, GreatUncleGreatNephew);
+		testRelatedness(4, 0.25, BasicRelation.DoubleFirstCousins);
 	}
 	
 	@Test
