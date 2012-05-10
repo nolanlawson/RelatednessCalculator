@@ -1,24 +1,24 @@
 package com.nolanlawson.relatedness;
 
-import static com.nolanlawson.relatedness.BasicRelation.Cousins;
-import static com.nolanlawson.relatedness.BasicRelation.GrandparentGrandchild;
-import static com.nolanlawson.relatedness.BasicRelation.GreatGrandparentGreatGrandchild;
-import static com.nolanlawson.relatedness.BasicRelation.GreatUncleGreatNephew;
-import static com.nolanlawson.relatedness.BasicRelation.HalfSiblings;
-import static com.nolanlawson.relatedness.BasicRelation.ParentChild;
-import static com.nolanlawson.relatedness.BasicRelation.SecondCousins;
+import static com.nolanlawson.relatedness.BasicRelation.AuntOrUncle;
+import static com.nolanlawson.relatedness.BasicRelation.Child;
+import static com.nolanlawson.relatedness.BasicRelation.Cousin;
+import static com.nolanlawson.relatedness.BasicRelation.DoubleFirstCousin;
+import static com.nolanlawson.relatedness.BasicRelation.Grandchild;
+import static com.nolanlawson.relatedness.BasicRelation.Grandparent;
+import static com.nolanlawson.relatedness.BasicRelation.GreatAuntOrUncle;
+import static com.nolanlawson.relatedness.BasicRelation.GreatGrandchild;
+import static com.nolanlawson.relatedness.BasicRelation.GreatGrandparent;
+import static com.nolanlawson.relatedness.BasicRelation.GreatNieceOrNephew;
+import static com.nolanlawson.relatedness.BasicRelation.HalfSibling;
+import static com.nolanlawson.relatedness.BasicRelation.NieceOrNephew;
+import static com.nolanlawson.relatedness.BasicRelation.Parent;
+import static com.nolanlawson.relatedness.BasicRelation.SecondCousin;
 import static com.nolanlawson.relatedness.BasicRelation.Self;
-import static com.nolanlawson.relatedness.BasicRelation.Siblings;
-import static com.nolanlawson.relatedness.BasicRelation.UncleNephew;
+import static com.nolanlawson.relatedness.BasicRelation.Sibling;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.nolanlawson.relatedness.BasicRelation;
-import com.nolanlawson.relatedness.CommonAncestor;
-import com.nolanlawson.relatedness.Relatedness;
-import com.nolanlawson.relatedness.RelatednessCalculator;
-import com.nolanlawson.relatedness.Relation;
 
 /**
  * Tests taken from calculations on http://en.wikipedia.org/wiki/Coefficient_of_relationship.
@@ -31,16 +31,21 @@ public class RelatednessTest {
 	public void testBasicRelations() {
 		
 		testRelatedness(0, 1.0, Self);
-		testRelatedness(1, 0.5, ParentChild);
-		testRelatedness(2, 0.5, Siblings);
-		testRelatedness(2, 0.25, GrandparentGrandchild);
-		testRelatedness(2, 0.25, HalfSiblings);
-		testRelatedness(3, 0.25, UncleNephew);
-		testRelatedness(3, 0.125, GreatGrandparentGreatGrandchild);
-		testRelatedness(4, 0.125, Cousins);
-		testRelatedness(6, 0.03125, SecondCousins);
-		testRelatedness(5, 0.0625, GreatUncleGreatNephew);
-		testRelatedness(4, 0.25, BasicRelation.DoubleFirstCousins);
+		testRelatedness(1, 0.5, Parent);
+		testRelatedness(1, 0.5, Child);
+		testRelatedness(2, 0.5, Sibling);
+		testRelatedness(2, 0.25, Grandparent);
+		testRelatedness(2, 0.25, Grandchild);
+		testRelatedness(2, 0.25, HalfSibling);
+		testRelatedness(3, 0.25, AuntOrUncle);
+		testRelatedness(3, 0.25, NieceOrNephew);
+		testRelatedness(3, 0.125, GreatGrandparent);
+		testRelatedness(3, 0.125, GreatGrandchild);
+		testRelatedness(4, 0.125, Cousin);
+		testRelatedness(6, 0.03125, SecondCousin);
+		testRelatedness(5, 0.0625, GreatAuntOrUncle);
+		testRelatedness(5, 0.0625, GreatNieceOrNephew);
+		testRelatedness(4, 0.25, DoubleFirstCousin);
 	}
 	
 	@Test
