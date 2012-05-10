@@ -43,8 +43,8 @@ public class RelatednessTest {
 		testRelatedness(3, 0.125, GreatGrandchild);
 		testRelatedness(4, 0.125, Cousin);
 		testRelatedness(6, 0.03125, SecondCousin);
-		testRelatedness(5, 0.0625, GreatAuntOrUncle);
-		testRelatedness(5, 0.0625, GreatNieceOrNephew);
+		testRelatedness(4, 0.125, GreatAuntOrUncle);
+		testRelatedness(4, 0.125, GreatNieceOrNephew);
 		testRelatedness(4, 0.25, DoubleFirstCousin);
 	}
 	

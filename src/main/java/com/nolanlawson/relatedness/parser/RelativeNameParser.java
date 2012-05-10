@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Ordering;
 import com.nolanlawson.relatedness.BasicRelation;
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
@@ -74,7 +75,7 @@ public class RelativeNameParser {
 	private static final ImmutableMap<String, BasicRelation> REVERSE_VOCABULARY = createReverseVocabulary();
 	
 	// 's is the English possessive clitic
-	private static final String BASIC_RELATIVE_PATTERN = "(%1$s)(\\s+'s\\s+(%1$s))*";
+	private static final String BASIC_RELATIVE_PATTERN = "%1$s";
 	
 	private static final Pattern RELATIVE_PATTERN = createRelativePattern();
 	
@@ -84,17 +85,16 @@ public class RelativeNameParser {
 	 * @return
 	 */
 	public static Relation parse(String name) {
-		Matcher matcher = RELATIVE_PATTERN.matcher(name);
+		Matcher matcher = RELATIVE_PATTERN.matcher(name.trim());
 		List<CommonAncestor> currentAncestors = null;
 		while (matcher.find()) {
-			Relation relation = REVERSE_VOCABULARY.get(name.toLowerCase()).getRelation();
+			Relation relation = REVERSE_VOCABULARY.get(matcher.group().toLowerCase()).getRelation();
 			if (currentAncestors == null) {
 				currentAncestors = ((Relation)relation.clone()).getCommonAncestors();
 			} else {
 				currentAncestors = doRelativeAddition(currentAncestors, relation.getCommonAncestors());
 			}
 		}
-		
 		if (currentAncestors == null) {
 			throw new IllegalArgumentException("unknown relation: " + name);
 		}
@@ -152,12 +152,25 @@ public class RelativeNameParser {
 	 */
 	private static Pattern createRelativePattern() {
 		
+		// sort from longest to shortest to avoid greedy regexes taking the shorter string
 		String vocabTermsAsPattern = Joiner.on('|').join(
-				Iterables.transform(VOCABULARY.values(), expandRegex()));
+				orderByLength().reverse().sortedCopy(
+				Iterables.transform(VOCABULARY.values(), expandRegex())));
 		
 		String patternString = String.format(BASIC_RELATIVE_PATTERN, vocabTermsAsPattern.toString());
 		
 		return Pattern.compile(patternString, Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
+	}
+	
+	private static Ordering<String> orderByLength() {
+		return new Ordering<String>() {
+
+			@Override
+			public int compare(String left, String right) {
+				return left.length() - right.length();
+			}
+			
+		};
 	}
 	
 	/**

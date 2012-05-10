@@ -36,8 +36,8 @@ public enum BasicRelation {
 	
 	// or GreatAuntGreatNiece, to be gender-neutral...
 	// share two ancestors, each a grandparent/great-grandparent
-	GreatAuntOrUncle (new Relation(new CommonAncestor(3, 2), new CommonAncestor(3, 2))),
-	GreatNieceOrNephew (new Relation(new CommonAncestor(2, 3), new CommonAncestor(2, 3))),
+	GreatAuntOrUncle (new Relation(new CommonAncestor(3, 1), new CommonAncestor(3, 1))),
+	GreatNieceOrNephew (new Relation(new CommonAncestor(1, 3), new CommonAncestor(1, 3))),
 	
 	// Rare case where two siblings from one family each marry two siblings from another family,
 	// so their kids share all 4 grandparents
