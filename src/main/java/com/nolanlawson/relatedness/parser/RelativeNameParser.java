@@ -60,7 +60,7 @@ public class RelativeNameParser {
 			.putAll(Child, "son", "daughter", "child", "kid")
 			.putAll(Sibling, "sibling", "brother", "sister", "sis", "bro")
 			.putAll(HalfSibling, "half brother", "half sister")
-			.putAll(Cousin, "cousin")
+			.putAll(Cousin, "cousin", "first cousin")
 			.putAll(Grandparent, GRANDPARENT_NAMES)
 			.putAll(Grandchild, GRANDCHILD_NAMES)
 			.putAll(AuntOrUncle, AUNT_OR_UNCLE_NAMES)

@@ -56,6 +56,7 @@ public class ParserTest {
 		testEquals("half-sister's son's son", new Relation(
 				new CommonAncestor(1, 3)
 				));
+		
 	}
 	
 	private void testEquals(String name, BasicRelation basicRelation) {
