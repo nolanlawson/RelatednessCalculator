@@ -6,10 +6,6 @@ import static com.nolanlawson.relatedness.BasicRelation.Cousin;
 import static com.nolanlawson.relatedness.BasicRelation.DoubleFirstCousin;
 import static com.nolanlawson.relatedness.BasicRelation.Grandchild;
 import static com.nolanlawson.relatedness.BasicRelation.Grandparent;
-import static com.nolanlawson.relatedness.BasicRelation.GreatAuntOrUncle;
-import static com.nolanlawson.relatedness.BasicRelation.GreatGrandchild;
-import static com.nolanlawson.relatedness.BasicRelation.GreatGrandparent;
-import static com.nolanlawson.relatedness.BasicRelation.HalfSibling;
 import static com.nolanlawson.relatedness.BasicRelation.NieceOrNephew;
 import static com.nolanlawson.relatedness.BasicRelation.Parent;
 import static com.nolanlawson.relatedness.BasicRelation.SecondCousin;
@@ -17,11 +13,13 @@ import static com.nolanlawson.relatedness.BasicRelation.Sibling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +36,7 @@ import com.google.common.collect.Ordering;
 import com.nolanlawson.relatedness.BasicRelation;
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
+import com.nolanlawson.relatedness.UnknownRelationException;
 /**
  * Parses English names for relatives, e.g. "grandma" or "cousin" or "grandma's cousin" or "dad's cousin's daughter."
  * @author nolan
@@ -52,6 +51,8 @@ public class RelativeNameParser {
 	private static final List<String> AUNT_OR_UNCLE_NAMES = Arrays.asList(
 			"aunt", "uncle", "auntie", "unkie");
 	
+	private static final Set<BasicRelation> GREATABLE_RELATIONS = EnumSet.of(Grandparent, Grandchild, AuntOrUncle, NieceOrNephew);
+	private static final Set<BasicRelation> HALFABLE_RELATIONS = EnumSet.of(Sibling, Cousin, AuntOrUncle, NieceOrNephew);
 	
 	private static final ImmutableMultimap<BasicRelation, String> VOCABULARY = 
 			new ImmutableMultimap.Builder<BasicRelation, String>()
@@ -59,7 +60,6 @@ public class RelativeNameParser {
 					"daddy", "mommy", "mama", "mamma", "pops")
 			.putAll(Child, "son", "daughter", "child", "kid")
 			.putAll(Sibling, "sibling", "brother", "sister", "sis", "bro")
-			.putAll(HalfSibling, "half brother", "half sister")
 			.putAll(Cousin, "cousin", "first cousin")
 			.putAll(Grandparent, GRANDPARENT_NAMES)
 			.putAll(Grandchild, GRANDCHILD_NAMES)
@@ -67,15 +67,20 @@ public class RelativeNameParser {
 			.putAll(NieceOrNephew, "niece", "nephew")
 			.putAll(SecondCousin, "second cousin", "2nd cousin")
 			.putAll(DoubleFirstCousin, "double cousin", "double first cousin")
-			.putAll(GreatAuntOrUncle, Iterables.transform(AUNT_OR_UNCLE_NAMES, addGreat()))
-			.putAll(GreatGrandparent, Iterables.transform(GRANDPARENT_NAMES, addGreat()))
-			.putAll(GreatGrandchild, Iterables.transform(GRANDCHILD_NAMES, addGreat()))
 			.build();
 	
 	private static final ImmutableMap<String, BasicRelation> REVERSE_VOCABULARY = createReverseVocabulary();
 	
+	private static final String GREAT = "great";
+	private static final String HALF = "half";
+	
 	// 's is the English possessive clitic
-	private static final String BASIC_RELATIVE_PATTERN = "%1$s";
+	private static final String BASIC_RELATIVE_PATTERN = 
+			"(?:'s\\s+)?" + // optional possessive "'s"
+			"((?:" + GREAT + "[ -]?)*)" + // greats
+			"((?:" + HALF + "[ -]?)?)" + // half
+			"(%s)";
+	
 	
 	private static final Pattern RELATIVE_PATTERN = createRelativePattern();
 	
@@ -87,19 +92,104 @@ public class RelativeNameParser {
 	public static Relation parse(String name) {
 		Matcher matcher = RELATIVE_PATTERN.matcher(name.trim());
 		List<CommonAncestor> currentAncestors = null;
+		int lastIndex = 0;
 		while (matcher.find()) {
-			Relation relation = REVERSE_VOCABULARY.get(matcher.group().toLowerCase()).getRelation();
-			if (currentAncestors == null) {
-				currentAncestors = ((Relation)relation.clone()).getCommonAncestors();
-			} else {
+			
+			// test to make sure there weren't any characters we skipped over
+			CharSequence interimText = name.subSequence(lastIndex, matcher.start());
+			if (containsRelevantCharacters(interimText)) {
+				throw new UnknownRelationException(String.format(
+						"Cannot parse '%s': unknown string '%s'", name, interimText));
+			}
+			
+			Relation relation = parseSingleRelation(matcher);
+			
+			if (currentAncestors == null) { // no other relations, e.g. dad's sister's daughter's...
+				currentAncestors = relation.getCommonAncestors();
+			} else { // 'add' the relations together
 				currentAncestors = doRelativeAddition(currentAncestors, relation.getCommonAncestors());
 			}
+			
+			lastIndex = matcher.end();
 		}
 		if (currentAncestors == null) {
-			throw new IllegalArgumentException("unknown relation: " + name);
+			throw new UnknownRelationException("unknown relation: " + name);
+		} else if (containsRelevantCharacters(name.subSequence(lastIndex, name.length()))) { // trailing text was not used
+			throw new UnknownRelationException(String.format(
+					"Cannot parse '%s': unknown string '%s'", name, name.subSequence(lastIndex, name.length())));
 		}
 		
 		return new Relation(currentAncestors);
+	}
+
+	private static boolean containsRelevantCharacters(CharSequence interimText) {
+		// wish I could use Guava's CharMatcher here... but I'm trying to keep this jar light.  Sigh.
+		for (int i = 0; i < interimText.length(); i++) {
+			if (Character.isLetterOrDigit(interimText.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static Relation parseSingleRelation(Matcher matcher) {
+		int numGreats = countGreats(matcher.group(1).toLowerCase());
+		boolean isHalf = matcher.group(2).length() > 0;
+		BasicRelation basicRelation = REVERSE_VOCABULARY.get(matcher.group(3).toLowerCase());
+		
+		if (numGreats > 0 && !GREATABLE_RELATIONS.contains(basicRelation)) {
+			// not an aunt, uncle, grandparent, grandkid, etc.
+			throw new UnknownRelationException("impossible relation: " + matcher.group());
+		} else if (isHalf && !HALFABLE_RELATIONS.contains(basicRelation)) {
+			throw new UnknownRelationException("impossible relation: " + matcher.group());
+		}
+		
+		Relation relation = (Relation)basicRelation.getRelation().clone();
+		
+		if (numGreats > 0) {
+			applyGreats(relation, numGreats);
+		}
+		if (isHalf) {
+			applyHalf(relation);
+		}
+		
+		return relation;
+		
+	}
+
+	/**
+	 * All this requires is deleting one of the common ancestors, e.g. in the case of half-siblings,
+	 * it's one of the parents.
+	 * @param relation
+	 */
+	private static void applyHalf(Relation relation) {
+		relation.getCommonAncestors().remove(0);
+	}
+
+	/**
+	 * Apply any number of "greats" to a relation.
+	 * @param relation
+	 * @param numGreats
+	 */
+	private static void applyGreats(Relation relation, int numGreats) {
+		// 'great' relationships are applied by simply increasing the max distance of the common ancestors.  Trust me,
+		// the math works out.
+		for (CommonAncestor commonAncestor : relation.getCommonAncestors()) {
+			if (commonAncestor.getDistanceFromFirst() > commonAncestor.getDistanceFromSecond()) {
+				commonAncestor.setDistanceFromFirst(commonAncestor.getDistanceFromFirst() + numGreats);
+			} else {
+				commonAncestor.setDistanceFromSecond(commonAncestor.getDistanceFromSecond() + numGreats);
+			}
+		}
+	}
+
+	private static int countGreats(String group) {
+		int count = 0, idx = 0;
+		while ((idx = group.indexOf(GREAT, idx)) != -1) {
+			idx += GREAT.length();
+			count++;
+		}
+		return count;
 	}
 
 	private static ImmutableMap<String, BasicRelation> createReverseVocabulary() {
@@ -199,14 +289,5 @@ public class RelativeNameParser {
 				CharMatcher.is(' ').replaceFrom(input, '-'),
 				CharMatcher.is(' ').replaceFrom(input, "")
 				)));
-	}
-	
-	private static Function<String, String> addGreat() {
-		return new Function<String, String>() {
-
-			public String apply(String input) {
-				return "great " + input;
-			}
-		};
 	}
 }
