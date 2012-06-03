@@ -102,6 +102,16 @@ public class ParserTest {
 	}
 	
 	@Test
+	public void testGrandparents() {
+		testEquals("granddad", Grandparent);
+		testEquals("grandmother", Grandparent);
+		testEquals("grandfather", Grandparent);
+		testEquals("grand dad", Grandparent);
+		testEquals("grand-daddy", Grandparent);
+		testEquals("granddaddy", Grandparent);
+	}
+	
+	@Test
 	public void testReallyComplexParses() {
 		// overheard on a message board - "she's my gramma's cousin's daughter"
 		testEquals("gramma's cousin's daughter", new Relation(

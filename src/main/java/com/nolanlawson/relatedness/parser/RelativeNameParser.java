@@ -45,7 +45,8 @@ import com.nolanlawson.relatedness.UnknownRelationException;
 public class RelativeNameParser {
 
 	private static final List<String> GRANDPARENT_NAMES = Arrays.asList(
-			"grandpa", "grandma", "grandparent", "grammy", "grampy", "gramps", "gramma");
+			"grandpa", "grandma", "grandparent", "grammy", "grampy", "gramps", "gramma", "grandfather", "grandmother",
+			"granddad", "granddaddy", "grand dad", "grand daddy");
 	private static final List<String> GRANDCHILD_NAMES = Arrays.asList(
 			"grandchild", "grandson", "granddaughter");
 	private static final List<String> AUNT_OR_UNCLE_NAMES = Arrays.asList(
@@ -90,6 +91,7 @@ public class RelativeNameParser {
 	 * @return
 	 */
 	public static Relation parse(String name) {
+		
 		Matcher matcher = RELATIVE_PATTERN.matcher(name.trim());
 		List<CommonAncestor> currentAncestors = null;
 		int lastIndex = 0;
