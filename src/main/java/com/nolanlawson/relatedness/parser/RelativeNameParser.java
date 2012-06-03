@@ -77,7 +77,7 @@ public class RelativeNameParser {
 	
 	// 's is the English possessive clitic
 	private static final String BASIC_RELATIVE_PATTERN = 
-			"(?:'s\\s+)?" + // optional possessive "'s"
+			"((?:'s\\s+)?)" + // optional possessive "'s"
 			"((?:" + GREAT + "[ -]?)*)" + // greats
 			"((?:" + HALF + "[ -]?)?)" + // half
 			"(%s)";
@@ -102,6 +102,15 @@ public class RelativeNameParser {
 			if (containsRelevantCharacters(interimText)) {
 				throw new UnknownRelationException(String.format(
 						"Cannot parse '%s': unknown string '%s'", name, interimText));
+			}
+			
+			// the possessive "'s" is disallowed in the first token and required afterwards
+			if (currentAncestors == null && matcher.group(1).length() > 0) {
+				throw new UnknownRelationException(String.format(
+						"Cannot parse '%s': string unacceptable: '%s'.", name, matcher.group(1)));
+			} else if (currentAncestors != null && matcher.group(1).length() == 0) {
+				throw new UnknownRelationException(String.format(
+						"Cannot parse '%s': possessive \"'s\" is required.", name));
 			}
 			
 			Relation relation = parseSingleRelation(matcher);
@@ -135,9 +144,9 @@ public class RelativeNameParser {
 	}
 
 	private static Relation parseSingleRelation(Matcher matcher) {
-		int numGreats = countGreats(matcher.group(1).toLowerCase());
-		boolean isHalf = matcher.group(2).length() > 0;
-		BasicRelation basicRelation = REVERSE_VOCABULARY.get(matcher.group(3).toLowerCase());
+		int numGreats = countGreats(matcher.group(2).toLowerCase());
+		boolean isHalf = matcher.group(3).length() > 0;
+		BasicRelation basicRelation = REVERSE_VOCABULARY.get(matcher.group(4).toLowerCase());
 		
 		if (numGreats > 0 && !GREATABLE_RELATIONS.contains(basicRelation)) {
 			// not an aunt, uncle, grandparent, grandkid, etc.
@@ -219,7 +228,7 @@ public class RelativeNameParser {
 			List<CommonAncestor> second) {
 		
 		if (first.size() > 1 && second.size() > 1) {
-			throw new IllegalArgumentException("Cannot parse relation with multiple common ancestors in each group");
+			throw new UnknownRelationException("Cannot parse relation with multiple common ancestors in each group");
 		}
 		
 		List<CommonAncestor> result = new ArrayList<CommonAncestor>();

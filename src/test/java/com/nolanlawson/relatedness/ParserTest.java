@@ -111,6 +111,15 @@ public class ParserTest {
 		testEquals("granddaddy", Grandparent);
 	}
 	
+	@Test(expected=UnknownRelationException.class)
+	public void testIllegalUseOfPossessive1() {
+		RelativeNameParser.parse("'s brother");
+	}
+	
+	@Test(expected=UnknownRelationException.class)
+	public void testIllegalUseOfPossessive2() {
+		RelativeNameParser.parse("cousin daughter");
+	}	
 	@Test
 	public void testReallyComplexParses() {
 		// overheard on a message board - "she's my gramma's cousin's daughter"
