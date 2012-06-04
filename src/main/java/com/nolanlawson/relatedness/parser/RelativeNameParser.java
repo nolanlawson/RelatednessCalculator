@@ -37,6 +37,7 @@ import com.nolanlawson.relatedness.BasicRelation;
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
 import com.nolanlawson.relatedness.UnknownRelationException;
+import com.nolanlawson.relatedness.graph.RelationGraph;
 /**
  * Parses English names for relatives, e.g. "grandma" or "cousin" or "grandma's cousin" or "dad's cousin's daughter."
  * @author nolan
@@ -85,14 +86,32 @@ public class RelativeNameParser {
 	
 	private static final Pattern RELATIVE_PATTERN = createRelativePattern();
 	
+	
+	/**
+	 * Create a graph for the given relation
+	 * @param name
+	 * @return
+	 */		
+	public static RelationGraph parseGraph(String name) {
+		return parse(name, true).getGraph();
+	}
+	
 	/**
 	 * Figure out the relation from a given string, e.g. the relation for "dad's second cousin's daughter"
 	 * @param name
 	 * @return
 	 */
 	public static Relation parse(String name) {
+		return parse(name, false).getRelation();
+	}
+
+	private static RelationAndGraph parse(String name, boolean createGraph) {
 		
-		Matcher matcher = RELATIVE_PATTERN.matcher(name.trim());
+		RelationGraph graph = createGraph ? new RelationGraph() : null;
+		
+		name = name.trim();
+		
+		Matcher matcher = RELATIVE_PATTERN.matcher(name);
 		List<CommonAncestor> currentAncestors = null;
 		int lastIndex = 0;
 		while (matcher.find()) {
@@ -121,6 +140,10 @@ public class RelativeNameParser {
 				currentAncestors = doRelativeAddition(currentAncestors, relation.getCommonAncestors());
 			}
 			
+			if (createGraph) {
+				graph.addRelation(name.substring(0, matcher.start()).trim(), matcher.group(), relation);
+			}
+			
 			lastIndex = matcher.end();
 		}
 		if (currentAncestors == null) {
@@ -130,7 +153,7 @@ public class RelativeNameParser {
 					"Cannot parse '%s': unknown string '%s'", name, name.subSequence(lastIndex, name.length())));
 		}
 		
-		return new Relation(currentAncestors);
+		return new RelationAndGraph(new Relation(currentAncestors), graph);
 	}
 
 	private static boolean containsRelevantCharacters(CharSequence interimText) {
@@ -300,5 +323,22 @@ public class RelativeNameParser {
 				CharMatcher.is(' ').replaceFrom(input, '-'),
 				CharMatcher.is(' ').replaceFrom(input, "")
 				)));
+	}
+	
+	private static class RelationAndGraph {
+		private Relation relation;
+		private RelationGraph graph;
+		private RelationAndGraph(Relation relation, RelationGraph graph) {
+			this.relation = relation;
+			this.graph = graph;
+		}
+		public Relation getRelation() {
+			return relation;
+		}
+		public RelationGraph getGraph() {
+			return graph;
+		}
+		
+		
 	}
 }
