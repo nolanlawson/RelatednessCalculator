@@ -103,7 +103,7 @@ public class RelationGraph {
 				.append('\n');
 		}
 		for (String nodeConnection : nodeConnections) {
-			stringBuilder.append(nodeConnection).append('\n');
+			stringBuilder.append(nodeConnection).append(";\n");
 		}
 		return String.format(TEMPLATE, stringBuilder);
 	}
