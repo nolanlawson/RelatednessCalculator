@@ -115,7 +115,7 @@ public class RelationGraph {
 			return labelKey.getLabel();
 		}
 		
-		String possessive = labelKey.getLabel().equals("you") ? "r" : "'s";
+		String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
 		return new StringBuilder(labelKey.getLabel())
 				.append(possessive)
 				.append(' ')

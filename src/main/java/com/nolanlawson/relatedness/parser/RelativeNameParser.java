@@ -75,6 +75,8 @@ public class RelativeNameParser {
 	
 	private static final String GREAT = "great";
 	private static final String HALF = "half";
+	private static final String YOU = "You";
+	private static final String YOUR = "Your";
 	
 	// 's is the English possessive clitic
 	private static final String BASIC_RELATIVE_PATTERN = 
@@ -133,15 +135,22 @@ public class RelativeNameParser {
 			}
 			
 			Relation relation = parseSingleRelation(matcher);
+
+			
+			if (createGraph) {
+				// first relation will just be called "you", since that will make sense to most people
+				String nameOfFirst = currentAncestors == null 
+						? YOU 
+						: YOUR + " " + name.substring(0, matcher.start()).trim().toLowerCase();
+				String nameOfSecond = YOUR + " " + name.substring(0, matcher.end()).trim().toLowerCase();
+				graph.addRelation(nameOfFirst, nameOfSecond, relation);
+			}
+			
 			
 			if (currentAncestors == null) { // no other relations, e.g. dad's sister's daughter's...
 				currentAncestors = relation.getCommonAncestors();
 			} else { // 'add' the relations together
 				currentAncestors = doRelativeAddition(currentAncestors, relation.getCommonAncestors());
-			}
-			
-			if (createGraph) {
-				graph.addRelation(name.substring(0, matcher.start()).trim(), matcher.group(), relation);
 			}
 			
 			lastIndex = matcher.end();

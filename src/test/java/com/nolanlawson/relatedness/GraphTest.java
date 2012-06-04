@@ -3,6 +3,7 @@ package com.nolanlawson.relatedness;
 import org.junit.Test;
 
 import com.nolanlawson.relatedness.graph.RelationGraph;
+import com.nolanlawson.relatedness.parser.RelativeNameParser;
 
 public class GraphTest {
 
@@ -17,6 +18,19 @@ public class GraphTest {
 		testGraph(BasicRelation.AuntOrUncle.getRelation(), "you", "your uncle");
 	}
 	
+	@Test
+	public void testParsedGraph() {
+		testParsedGraph("sister");
+		testParsedGraph("grandpa");
+		testParsedGraph("grandson");
+		testParsedGraph("father's cousin's daughter");
+	}
+	
+	private void testParsedGraph(String text) {
+		System.out.println(text);
+		System.out.println(RelativeNameParser.parseGraph(text).drawGraph());
+	}
+
 	private void testGraph(Relation relation, String sourceName, String targetName) {
 		RelationGraph relationGraph = new RelationGraph();
 		relationGraph.addRelation(sourceName, targetName, relation);
