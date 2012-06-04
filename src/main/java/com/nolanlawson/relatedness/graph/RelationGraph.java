@@ -35,22 +35,57 @@ public class RelationGraph {
 		
 		// draw the relation between two labels
 		
-		for (CommonAncestor commonAncestor : relation.getCommonAncestors()) {
-			for (int i = 1; i <= commonAncestor.getDistanceFromFirst(); i++) {
-				addNode(sourceName, targetName, i, commonAncestor.getDistanceFromFirst(), commonAncestor.getDistanceFromSecond());
+		// algorithm:
+		// For each common ancestor between A & B:
+		// 1) Walk from A to B along the family tree, creating a link at each step.  Name nodes relative to A
+		// 2) When you reach the common ancestor, decide whether to name it based on B, if B *is* the ancestor
+		// 3) As you walk away from the common ancestor toward B, name it relative to B
+		// 4) Finish when you reach B; name B that.
+		
+		for (int i = 0; i < relation.getCommonAncestors().size(); i++) {
+			CommonAncestor commonAncestor = relation.getCommonAncestors().get(i);
+			int distFrom1 = commonAncestor.getDistanceFromFirst();
+			int distFrom2 = commonAncestor.getDistanceFromSecond();
+			
+			// name the common ancestor relative to A, unless B is the common ancestor
+			String commonAncestorId = (distFrom2 == 0) 
+					? getId(targetName, 0, i)
+					: getId(sourceName, distFrom1, i);
+			
+			// add links between relatives on A's side, including A and the common ancestor
+			for (int j = 0; j < distFrom1; j++) {
+				String leftId = getId(sourceName, j);
+				String rightId;
+				
+				if (j + 1 == distFrom1) { // common ancestor; use the predetermined common ancestor name
+					rightId = commonAncestorId;
+				} else { // use a name relative to A
+					rightId = getId(sourceName, j + 1);
+				}
+				addNode(rightId, leftId);
 			}
-			for (int i = 1; i <= commonAncestor.getDistanceFromSecond(); i++) {
-				addNode(targetName, sourceName, i, commonAncestor.getDistanceFromSecond(), commonAncestor.getDistanceFromFirst());
-			}			
+			
+			// add relatives on B's side, starting from common ancestor, naming everyone relative to B
+			// except the common ancestor, and except if A is the common ancestor
+			for (int j = distFrom2; j > 0; j--) {
+				String leftId;
+				if (j == distFrom2) { // left is the common ancestor
+					leftId = commonAncestorId;
+				} else if (distFrom1 == 0){ // name after A if A is the common ancestor
+					leftId = getId(sourceName, -(distFrom2 - j));
+				} else { // name after B
+					leftId = getId(targetName, j);
+				}
+				String rightId;
+				if (j != 1 && distFrom1 == 0) { // the ancestor is A, and B is not the one on the right
+					rightId = getId(sourceName, -(distFrom2 - (j - 1)));
+				} else {
+					rightId = getId(targetName, j - 1);
+				}
+				addNode(leftId, rightId);
+			}
 		}
 		
-	}
-	
-	private void addNode(String name1, String name2, int i, int totalDistance, int distanceOfSecond) {
-		
-		String ancestorId = (i == totalDistance && distanceOfSecond == 0) ? getId(name2, 0) : getId(name1, i);
-		String descendantId = ((i-1) == totalDistance && distanceOfSecond == 0) ? getId(name2, 0) : getId(name1, (i-1));
-		addNode(ancestorId, descendantId);
 	}
 
 	/**
@@ -74,12 +109,44 @@ public class RelationGraph {
 	}
 
 	private String createHumanReadableLabel(LabelKey labelKey) {
-		// TODO allow for languages other than English
-		StringBuilder stringBuilder = new StringBuilder(labelKey.getLabel());
-		for (int i = 0; i < labelKey.getAncestorDistance(); i++) {
-			stringBuilder.append("'s parent");
+		// TODO allow for non-English
+		
+		if (labelKey.getAncestorDistance() == 0) {
+			return labelKey.getLabel();
 		}
-		return stringBuilder.toString();
+		
+		String possessive = labelKey.getLabel().equals("you") ? "r" : "'s";
+		return new StringBuilder(labelKey.getLabel())
+				.append(possessive)
+				.append(' ')
+				.append(createRelationString(labelKey.getAncestorDistance()))
+				.toString();
+	}
+
+	private CharSequence createRelationString(int distance) {
+		// TODO: allow for non-English
+		switch (distance) {
+			case 1:
+				return "parent";
+			case 2:
+				return "grandparent";
+			case -1:
+				return "child";
+			case -2:
+				return "grandchild";
+		}
+		// else add in a bunch of "great"s
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = Math.abs(distance); i > 2; i--) {
+			stringBuilder.append("great ");
+		}
+		if (distance > 0) {
+			stringBuilder.append("grandparent");
+		} else {
+			stringBuilder.append("grandchild");
+		}
+		return stringBuilder;
+		
 	}
 
 	private void addNode(String ancestorId, String descendantId) {
@@ -89,7 +156,11 @@ public class RelationGraph {
 	}
 
 	private String getId(String label, int ancestorDistance) {
-		LabelKey labelKey = new LabelKey(label, ancestorDistance);
+		return getId(label, ancestorDistance, 0);
+	}
+	
+	private String getId(String label, int ancestorDistance, int ancestorId) {
+		LabelKey labelKey = new LabelKey(label, ancestorDistance, ancestorId);
 		if (!labels.containsKey(labelKey)) {
 			labels.put(labelKey, nameIterator.next());
 		}
@@ -99,11 +170,12 @@ public class RelationGraph {
 	private static class LabelKey {
 		private String label;
 		private int ancestorDistance;
+		private int ancestorId;
 		
-		private LabelKey(String label, int ancestorDistance) {
-			super();
+		private LabelKey(String label, int ancestorDistance, int ancestorId) {
 			this.label = label;
 			this.ancestorDistance = ancestorDistance;
+			this.ancestorId = ancestorId;
 		}
 		
 		
@@ -116,15 +188,16 @@ public class RelationGraph {
 			return ancestorDistance;
 		}
 
-
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ancestorDistance;
+			result = prime * result + ancestorId;
 			result = prime * result + ((label == null) ? 0 : label.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -136,6 +209,8 @@ public class RelationGraph {
 			LabelKey other = (LabelKey) obj;
 			if (ancestorDistance != other.ancestorDistance)
 				return false;
+			if (ancestorId != other.ancestorId)
+				return false;
 			if (label == null) {
 				if (other.label != null)
 					return false;
@@ -144,11 +219,10 @@ public class RelationGraph {
 			return true;
 		}
 
-
 		@Override
 		public String toString() {
 			return "LabelKey [label=" + label + ", ancestorDistance="
-					+ ancestorDistance + "]";
+					+ ancestorDistance + ", ancestorId=" + ancestorId + "]";
 		}
 	}
 	
