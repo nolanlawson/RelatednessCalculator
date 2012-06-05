@@ -68,7 +68,7 @@ public class RelativeNameParser {
 					"daddy", "mommy", "mama", "mamma", "pops")
 			.putAll(Child, "son", "daughter", "child", "kid")
 			.putAll(Sibling, "sibling", "brother", "sister", "sis", "bro")
-			.putAll(Cousin, "cousin", "first cousin")
+			.putAll(Cousin, "cousin", "first cousin", "1st cousin")
 			.putAll(SecondCousin, "second cousin", "2nd cousin")
 			.putAll(ThirdCousin, "third cousin", "3rd cousin")
 			.putAll(FourthCousin, "fourth cousin", "4th cousin")
