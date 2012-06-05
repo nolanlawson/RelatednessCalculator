@@ -4,12 +4,18 @@ import static com.nolanlawson.relatedness.BasicRelation.AuntOrUncle;
 import static com.nolanlawson.relatedness.BasicRelation.Child;
 import static com.nolanlawson.relatedness.BasicRelation.Cousin;
 import static com.nolanlawson.relatedness.BasicRelation.DoubleFirstCousin;
+import static com.nolanlawson.relatedness.BasicRelation.EighthCousin;
+import static com.nolanlawson.relatedness.BasicRelation.FifthCousin;
+import static com.nolanlawson.relatedness.BasicRelation.FourthCousin;
 import static com.nolanlawson.relatedness.BasicRelation.Grandchild;
 import static com.nolanlawson.relatedness.BasicRelation.Grandparent;
 import static com.nolanlawson.relatedness.BasicRelation.NieceOrNephew;
 import static com.nolanlawson.relatedness.BasicRelation.Parent;
 import static com.nolanlawson.relatedness.BasicRelation.SecondCousin;
+import static com.nolanlawson.relatedness.BasicRelation.SeventhCousin;
 import static com.nolanlawson.relatedness.BasicRelation.Sibling;
+import static com.nolanlawson.relatedness.BasicRelation.SixthCousin;
+import static com.nolanlawson.relatedness.BasicRelation.ThirdCousin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,11 +69,17 @@ public class RelativeNameParser {
 			.putAll(Child, "son", "daughter", "child", "kid")
 			.putAll(Sibling, "sibling", "brother", "sister", "sis", "bro")
 			.putAll(Cousin, "cousin", "first cousin")
+			.putAll(SecondCousin, "second cousin", "2nd cousin")
+			.putAll(ThirdCousin, "third cousin", "3rd cousin")
+			.putAll(FourthCousin, "fourth cousin", "4th cousin")
+			.putAll(FifthCousin, "fifth cousin", "5th cousin")
+			.putAll(SixthCousin, "sixth cousin", "6th cousin")
+			.putAll(SeventhCousin, "seventh cousin", "7th cousin")
+			.putAll(EighthCousin, "eighth cousin", "8th cousin")
 			.putAll(Grandparent, GRANDPARENT_NAMES)
 			.putAll(Grandchild, GRANDCHILD_NAMES)
 			.putAll(AuntOrUncle, AUNT_OR_UNCLE_NAMES)
 			.putAll(NieceOrNephew, "niece", "nephew")
-			.putAll(SecondCousin, "second cousin", "2nd cousin")
 			.putAll(DoubleFirstCousin, "double cousin", "double first cousin")
 			.build();
 	
