@@ -47,6 +47,8 @@ public class RelationGraph {
 			int distFrom1 = commonAncestor.getDistanceFromFirst();
 			int distFrom2 = commonAncestor.getDistanceFromSecond();
 			
+			int unique = i / 2;  // this basically just fixes a bug with double cousins, where there are 4 common ancestors
+			
 			// name the common ancestor relative to A, unless B is the common ancestor
 			String commonAncestorId = (distFrom2 == 0) 
 					? getId(targetName, 0, i)
@@ -54,13 +56,13 @@ public class RelationGraph {
 			
 			// add links between relatives on A's side, including A and the common ancestor
 			for (int j = 0; j < distFrom1; j++) {
-				String leftId = getId(sourceName, j);
+				String leftId = getId(sourceName, j, j == 0 ? 0 : unique);
 				String rightId;
 				
 				if (j + 1 == distFrom1) { // common ancestor; use the predetermined common ancestor name
 					rightId = commonAncestorId;
 				} else { // use a name relative to A
-					rightId = getId(sourceName, j + 1);
+					rightId = getId(sourceName, j + 1, unique);
 				}
 				addNode(rightId, leftId);
 			}
@@ -72,13 +74,15 @@ public class RelationGraph {
 				if (j == distFrom2) { // left is the common ancestor
 					leftId = commonAncestorId;
 				} else if (distFrom1 == 0){ // name after A if A is the common ancestor
-					leftId = getId(sourceName, -(distFrom2 - j));
+					leftId = getId(sourceName, -(distFrom2 - j), unique);
 				} else { // name after B
-					leftId = getId(targetName, j);
+					leftId = getId(targetName, j, unique);
 				}
 				String rightId;
 				if (j != 1 && distFrom1 == 0) { // the ancestor is A, and B is not the one on the right
-					rightId = getId(sourceName, -(distFrom2 - (j - 1)));
+					rightId = getId(sourceName, -(distFrom2 - (j - 1)), unique);
+				} else if (j != 1) { // B is not the one on the right
+					rightId = getId(targetName, j - 1, unique);
 				} else {
 					rightId = getId(targetName, j - 1);
 				}
@@ -116,9 +120,10 @@ public class RelationGraph {
 		}
 		
 		String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
-		return new StringBuilder(labelKey.getLabel())
+		return new StringBuilder()
+				.append(labelKey.getLabel())
 				.append(possessive)
-				.append(' ')
+				.append(labelKey.getAncestorId() > 0 ? " other " : " ")
 				.append(createRelationString(labelKey.getAncestorDistance()))
 				.toString();
 	}
@@ -138,7 +143,7 @@ public class RelationGraph {
 		// else add in a bunch of "great"s
 		StringBuilder stringBuilder = new StringBuilder();
 		for (int i = Math.abs(distance); i > 2; i--) {
-			stringBuilder.append("great ");
+			stringBuilder.append("great-");
 		}
 		if (distance > 0) {
 			stringBuilder.append("grandparent");
@@ -186,6 +191,10 @@ public class RelationGraph {
 
 		public int getAncestorDistance() {
 			return ancestorDistance;
+		}
+		
+		public int getAncestorId() {
+			return ancestorId;
 		}
 
 		@Override
