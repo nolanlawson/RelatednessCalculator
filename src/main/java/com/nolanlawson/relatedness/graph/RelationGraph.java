@@ -119,17 +119,20 @@ public class RelationGraph {
 	private String createHumanReadableLabel(LabelKey labelKey) {
 		// TODO allow for non-English
 		
-		if (labelKey.getAncestorDistance() == 0) {
-			return labelKey.getLabel();
-		}
+		String label;
 		
-		String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
-		String label = new StringBuilder()
-				.append(labelKey.getLabel())
-				.append(possessive)
-				.append(labelKey.getAncestorId() > 0 ? " other " : " ")
-				.append(createRelationString(labelKey.getAncestorDistance()))
-				.toString();
+		if (labelKey.getAncestorDistance() == 0) {
+			label = labelKey.getLabel();
+		} else {
+		
+			String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
+			label = new StringBuilder()
+					.append(labelKey.getLabel())
+					.append(possessive)
+					.append(labelKey.getAncestorId() > 0 ? " other " : " ")
+					.append(createRelationString(labelKey.getAncestorDistance()))
+					.toString();
+		}
 		
 		// add newlines where appropriate
 		label = WordWrapper.wordWrap(label, MAX_DESIRED_LABEL_LENGTH);
