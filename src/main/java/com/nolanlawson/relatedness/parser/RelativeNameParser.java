@@ -42,6 +42,7 @@ import com.google.common.collect.Ordering;
 import com.nolanlawson.relatedness.BasicRelation;
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
+import com.nolanlawson.relatedness.RelationAndGraph;
 import com.nolanlawson.relatedness.UnknownRelationException;
 import com.nolanlawson.relatedness.graph.RelationGraph;
 /**
@@ -119,7 +120,7 @@ public class RelativeNameParser {
 		return parse(name, false).getRelation();
 	}
 
-	private static RelationAndGraph parse(String name, boolean createGraph) {
+	public static RelationAndGraph parse(String name, boolean createGraph) {
 		
 		RelationGraph graph = createGraph ? new RelationGraph() : null;
 		
@@ -344,22 +345,5 @@ public class RelativeNameParser {
 				CharMatcher.is(' ').replaceFrom(input, '-'),
 				CharMatcher.is(' ').replaceFrom(input, "")
 				)));
-	}
-	
-	private static class RelationAndGraph {
-		private Relation relation;
-		private RelationGraph graph;
-		private RelationAndGraph(Relation relation, RelationGraph graph) {
-			this.relation = relation;
-			this.graph = graph;
-		}
-		public Relation getRelation() {
-			return relation;
-		}
-		public RelationGraph getGraph() {
-			return graph;
-		}
-		
-		
 	}
 }
