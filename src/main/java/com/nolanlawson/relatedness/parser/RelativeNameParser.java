@@ -43,6 +43,7 @@ import com.nolanlawson.relatedness.BasicRelation;
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
 import com.nolanlawson.relatedness.RelationAndGraph;
+import com.nolanlawson.relatedness.RelationType;
 import com.nolanlawson.relatedness.UnknownRelationException;
 import com.nolanlawson.relatedness.graph.RelationGraph;
 /**
@@ -128,6 +129,7 @@ public class RelativeNameParser {
 		
 		Matcher matcher = RELATIVE_PATTERN.matcher(name);
 		List<CommonAncestor> currentAncestors = null;
+		Relation previousRelation = null;
 		int lastIndex = 0;
 		while (matcher.find()) {
 			
@@ -148,6 +150,14 @@ public class RelativeNameParser {
 			}
 			
 			Relation relation = parseSingleRelation(matcher);
+			
+			if (previousRelation != null && !RelationType.isValidProgression(
+					RelationType.fromRelation(previousRelation), 
+					RelationType.fromRelation(relation))) {
+				throw new UnknownRelationException(String.format(
+						"Cannot parse \"%s\" - this relationship makes no sense. " +
+						"There must be a better way to phrase it.", name.subSequence(0, matcher.end())));
+			}
 
 			
 			if (createGraph) {
@@ -167,6 +177,7 @@ public class RelativeNameParser {
 			}
 			
 			lastIndex = matcher.end();
+			previousRelation = relation;
 		}
 		if (currentAncestors == null) {
 			throw new UnknownRelationException("unknown relation: " + name);
