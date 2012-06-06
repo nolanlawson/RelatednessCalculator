@@ -1,13 +1,14 @@
 package com.nolanlawson.relatedness.graph;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
+import com.nolanlawson.relatedness.util.WordWrapper;
 
 public class RelationGraph {
 
@@ -17,8 +18,11 @@ public class RelationGraph {
 			"%s" +
 			"}\n";
 	
-	private Map<LabelKey,String> labels = new HashMap<LabelKey,String>();
-	private Set<String> nodeConnections = new HashSet<String>();
+	// we want to keep the graph nice and skinny
+	private static final int MAX_DESIRED_LABEL_LENGTH = 16;
+	
+	private Map<LabelKey,String> labels = new LinkedHashMap<LabelKey,String>();
+	private Set<String> nodeConnections = new LinkedHashSet<String>();
 	
 	private NodeNameIterator nameIterator = new NodeNameIterator();
 	
@@ -120,12 +124,17 @@ public class RelationGraph {
 		}
 		
 		String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
-		return new StringBuilder()
+		String label = new StringBuilder()
 				.append(labelKey.getLabel())
 				.append(possessive)
 				.append(labelKey.getAncestorId() > 0 ? " other " : " ")
 				.append(createRelationString(labelKey.getAncestorDistance()))
 				.toString();
+		
+		// add newlines where appropriate
+		label = WordWrapper.wordWrap(label, MAX_DESIRED_LABEL_LENGTH);
+		
+		return label.replace("\n", "\\n"); // escape newlines for the DOT format
 	}
 
 	private CharSequence createRelationString(int distance) {
