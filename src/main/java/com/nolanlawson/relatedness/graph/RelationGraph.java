@@ -119,10 +119,12 @@ public class RelationGraph {
 			String id = entry.getValue();
 			
 			// DOT format for declaring a node
-			stringBuilder.append(String.format("%s [label=\"%s\"];", id, createHumanReadableLabel(labelKey)))
-				.append('\n');
+			stringBuilder.append(id)
+                                .append(" [label=\"")
+                                .append(createHumanReadableLabel(labelKey))
+                                .append("\"];\n");
 		}
-		for (String nodeConnection : nodeConnections) {
+		for (CharSequence nodeConnection : nodeConnections) {
 			stringBuilder.append(nodeConnection).append(";\n");
 		}
 		return String.format(TEMPLATE, stringBuilder);
@@ -212,7 +214,9 @@ public class RelationGraph {
 
 	private void addEdge(String ancestorId, String descendantId) {
 		// DOT notation for a directed graph
-		nodeConnections.add(String.format("%s -> %s", ancestorId, descendantId));
+		nodeConnections.add(new StringBuilder(ancestorId)
+                        .append(" -> ")
+                        .append(descendantId).toString());
 		
 	}
 

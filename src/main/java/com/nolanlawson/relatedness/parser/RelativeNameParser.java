@@ -85,6 +85,9 @@ public class RelativeNameParser {
 			.putAll(DoubleFirstCousin, "double cousin", "double first cousin")
 			.build();
 	
+        private static final Pattern SPACES_AND_HYPHENS = Pattern.compile("[\\-\\s]");
+
+        
 	private static final ImmutableMap<String, BasicRelation> REVERSE_VOCABULARY = createReverseVocabulary();
 	
 	private static final String GREAT = "great";
@@ -190,19 +193,14 @@ public class RelativeNameParser {
 	}
 
 	private static boolean containsRelevantCharacters(CharSequence interimText) {
-		// wish I could use Guava's CharMatcher here... but I'm trying to keep this jar light.  Sigh.
-		for (int i = 0; i < interimText.length(); i++) {
-			if (Character.isLetterOrDigit(interimText.charAt(i))) {
-				return true;
-			}
-		}
-		return false;
+        
+            return CharMatcher.JAVA_LETTER_OR_DIGIT.matchesAnyOf(interimText);
 	}
 
 	private static Relation parseSingleRelation(Matcher matcher) {
 		int numGreats = countGreats(matcher.group(2).toLowerCase());
 		boolean isHalf = matcher.group(3).length() > 0;
-		BasicRelation basicRelation = REVERSE_VOCABULARY.get(matcher.group(4).toLowerCase());
+		BasicRelation basicRelation = REVERSE_VOCABULARY.get(collapseName(matcher.group(4)));
 		
 		if (numGreats > 0 && !GREATABLE_RELATIONS.contains(basicRelation)) {
 			// not an aunt, uncle, grandparent, grandkid, etc.
@@ -266,9 +264,7 @@ public class RelativeNameParser {
 		Map<String, BasicRelation> result = new HashMap<String, BasicRelation>();
 		
 		for (Entry<String, BasicRelation> entry : multimap.entries()) {
-			for (String match : expandMatches(entry.getKey())) {
-				result.put(match, entry.getValue());
-			}
+			result.put(collapseName(entry.getKey()), entry.getValue());
 		}
 		return ImmutableMap.copyOf(result);
 	}
@@ -345,16 +341,11 @@ public class RelativeNameParser {
 	}
 	
 	/**
-	 * spaces should be replaceable with "" or "-", e.g. in the case of half-sister, half sister,
+	 * spaces and hyphens should collapse to "", e.g. in the case of half-sister, half sister,
 	 * great grandpa, great-grandpa, greatgrandpa, etc.
 	 * @return
 	 */
-	private static List<String> expandMatches(String input) {
-		// expand ' ' into '-' and ""
-		return new ArrayList<String>(new HashSet<String>(Arrays.asList(
-				input,
-				CharMatcher.is(' ').replaceFrom(input, '-'),
-				CharMatcher.is(' ').replaceFrom(input, "")
-				)));
+	private static String collapseName(String input) {
+		return SPACES_AND_HYPHENS.matcher(input).replaceAll("").trim().toLowerCase();
 	}
 }
