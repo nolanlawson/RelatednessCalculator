@@ -1,10 +1,10 @@
 package com.nolanlawson.relatedness.graph;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
@@ -14,20 +14,19 @@ public class RelationGraph {
 
 	private static final String TEMPLATE = "digraph a {\n" +
 			"size=\"10,10\";\n" +
-			"ordering=\"out\";\n" + // forces nodes to be drawn in the order I list them
 			"%s" +
 			"}\n";
 	
-	// we want to keep the graph nice and skinny
-	private static final int TARGET_LABEL_LENGTH_TWO_ANCESTORS = 16;
+	// we want to keep the graph nice and skinny, so choose a decent word-wrapping width
 	private static final int TARGET_LABEL_LENGTH_FOUR_ANCESTORS = 8;
+	private static final int TARGET_LABEL_LENGTH_TWO_ANCESTORS = 16;
 	private static final int TARGET_LABEL_LENGTH_ONE_ANCESTOR = 32;	
 	
 	// so we can say 'your parent', 'your other parent,' 'your third grandparent', etc.
 	private static final String[] COUNTER_WORDS = {"","other ","third ","fourth "};
 	
 	// sort by name so that e.g. "grandparent" appears before "other grandparent" appears before "third grandparent"...
-	private Map<LabelKey,String> labels = new TreeMap<LabelKey,String>();
+	private Map<LabelKey,String> labels = new LinkedHashMap<LabelKey,String>();
 	private Set<String> nodeConnections = new HashSet<String>();
 	
 	private NodeNameIterator nameIterator = new NodeNameIterator();
@@ -229,7 +228,7 @@ public class RelationGraph {
 		return labels.get(labelKey);
 	}
 	
-	private static class LabelKey implements Comparable<LabelKey> {
+	private static class LabelKey {
 		private String label;
 		private int ancestorDistance;
 		private int ancestorId;
@@ -289,19 +288,6 @@ public class RelationGraph {
 		public String toString() {
 			return "LabelKey [label=" + label + ", ancestorDistance="
 					+ ancestorDistance + ", ancestorId=" + ancestorId + "]";
-		}
-
-
-		public int compareTo(LabelKey other) {
-		    // sort by label, ancestorDistance, ancestorId
-		    // this ensures proper left-to-right ordering
-		    int compare;
-		    if ((compare = label.compareTo(other.label)) != 0) {
-			return compare;
-		    } else if ((compare = (ancestorDistance - other.ancestorDistance)) != 0) {
-			return compare;
-		    }
-		    return ancestorId - other.ancestorId;
 		}
 	}
 	
