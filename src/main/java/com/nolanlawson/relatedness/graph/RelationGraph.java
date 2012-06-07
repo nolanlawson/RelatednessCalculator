@@ -19,12 +19,18 @@ public class RelationGraph {
 			"}\n";
 	
 	// we want to keep the graph nice and skinny
-	private static final int MAX_DESIRED_LABEL_LENGTH = 16;
+	private static final int TARGET_LABEL_LENGTH_TWO_ANCESTORS = 16;
+	private static final int TARGET_LABEL_LENGTH_FOUR_ANCESTORS = 8;
+	private static final int TARGET_LABEL_LENGTH_ONE_ANCESTOR = 32;	
+	
+	// so we can say 'your parent', 'your other parent,' 'your third grandparent', etc.
+	private static final String[] COUNTER_WORDS = {"","other ","third ","fourth "};
 	
 	private Map<LabelKey,String> labels = new LinkedHashMap<LabelKey,String>();
 	private Set<String> nodeConnections = new LinkedHashSet<String>();
 	
 	private NodeNameIterator nameIterator = new NodeNameIterator();
+	private int maxAncestorsInSingleGeneration = 1;
 	
 	public RelationGraph() {
 	}
@@ -37,6 +43,10 @@ public class RelationGraph {
 	 */
 	public void addRelation(String sourceName, String targetName, Relation relation) {
 		
+	    	// update the max ancestors in a single generation
+	    	maxAncestorsInSingleGeneration = Math.max(maxAncestorsInSingleGeneration, 
+	    		relation.getCommonAncestors().size());
+	    
 		// draw the relation between two labels
 		
 		// algorithm:
@@ -68,7 +78,7 @@ public class RelationGraph {
 				} else { // use a name relative to A
 					rightId = getId(sourceName, j + 1, unique);
 				}
-				addNode(rightId, leftId);
+				addVertex(rightId, leftId);
 			}
 			
 			// add relatives on B's side, starting from common ancestor, naming everyone relative to B
@@ -90,7 +100,7 @@ public class RelationGraph {
 				} else {
 					rightId = getId(targetName, j - 1);
 				}
-				addNode(leftId, rightId);
+				addVertex(leftId, rightId);
 			}
 		}
 		
@@ -117,27 +127,45 @@ public class RelationGraph {
 	}
 
 	private String createHumanReadableLabel(LabelKey labelKey) {
-		// TODO allow for non-English
-		
-		String label;
-		
-		if (labelKey.getAncestorDistance() == 0) {
-			label = labelKey.getLabel();
-		} else {
-		
-			String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
-			label = new StringBuilder()
-					.append(labelKey.getLabel())
-					.append(possessive)
-					.append(labelKey.getAncestorId() > 0 ? " other " : " ")
-					.append(createRelationString(labelKey.getAncestorDistance()))
-					.toString();
-		}
-		
-		// add newlines where appropriate
-		label = WordWrapper.wordWrap(label, MAX_DESIRED_LABEL_LENGTH);
-		
-		return label.replace("\n", "\\n"); // escape newlines for the DOT format
+	    // TODO allow for non-English
+
+	    int maxLabelLength = determineMaxLabelLength();
+
+	    String label;
+
+	    if (labelKey.getAncestorDistance() == 0) {
+		label = labelKey.getLabel();
+	    } else {
+
+		String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
+		label = new StringBuilder()
+		.append(labelKey.getLabel())
+		.append(possessive)
+		.append(' ')
+		.append(COUNTER_WORDS[labelKey.getAncestorId()])
+		.append(createRelationString(labelKey.getAncestorDistance()))
+		.toString();
+	    }
+
+	    // add newlines where appropriate
+	    label = WordWrapper.wordWrap(label, maxLabelLength);
+
+	    return label.replace("\n", "\\n"); // escape newlines for the DOT format
+	}
+
+	private int determineMaxLabelLength() {
+	    // How much we want to wrap the text depends on how many "columnns" dot is going to output.
+	    // And the number of columns is determined by the max number of ancestors in a single generation,
+	    // e.g. 1 for "parent," 2 for "sister," and 4 for "double cousin".
+	    switch (maxAncestorsInSingleGeneration) {
+	    	case 4:
+			return TARGET_LABEL_LENGTH_FOUR_ANCESTORS;
+	    	case 1:
+			return TARGET_LABEL_LENGTH_ONE_ANCESTOR;
+	    	case 2:
+		default:
+		    	return TARGET_LABEL_LENGTH_TWO_ANCESTORS;
+	    }
 	}
 
 	private CharSequence createRelationString(int distance) {
@@ -166,7 +194,7 @@ public class RelationGraph {
 		
 	}
 
-	private void addNode(String ancestorId, String descendantId) {
+	private void addVertex(String ancestorId, String descendantId) {
 		// DOT notation for a directed graph
 		nodeConnections.add(String.format("%s -> %s", ancestorId, descendantId));
 		
