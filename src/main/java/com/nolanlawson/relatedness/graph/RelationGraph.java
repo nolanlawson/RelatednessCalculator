@@ -1,10 +1,10 @@
 package com.nolanlawson.relatedness.graph;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
@@ -12,9 +12,9 @@ import com.nolanlawson.relatedness.util.WordWrapper;
 
 public class RelationGraph {
 
-	private static final String TEMPLATE = "digraph relationgraph {\n" +
-			"// This attribute applies to the graph itself\n" +
+	private static final String TEMPLATE = "digraph a {\n" +
 			"size=\"10,10\";\n" +
+			"ordering=\"out\";\n" + // forces nodes to be drawn in the order I list them
 			"%s" +
 			"}\n";
 	
@@ -26,8 +26,9 @@ public class RelationGraph {
 	// so we can say 'your parent', 'your other parent,' 'your third grandparent', etc.
 	private static final String[] COUNTER_WORDS = {"","other ","third ","fourth "};
 	
-	private Map<LabelKey,String> labels = new LinkedHashMap<LabelKey,String>();
-	private Set<String> nodeConnections = new LinkedHashSet<String>();
+	// sort by name so that e.g. "grandparent" appears before "other grandparent" appears before "third grandparent"...
+	private Map<LabelKey,String> labels = new TreeMap<LabelKey,String>();
+	private Set<String> nodeConnections = new HashSet<String>();
 	
 	private NodeNameIterator nameIterator = new NodeNameIterator();
 	private int maxAncestorsInSingleGeneration = 1;
@@ -61,7 +62,9 @@ public class RelationGraph {
 			int distFrom1 = commonAncestor.getDistanceFromFirst();
 			int distFrom2 = commonAncestor.getDistanceFromSecond();
 			
-			int unique = i / 2;  // this basically just fixes a bug with double cousins, where there are 4 common ancestors
+			// this basically just fixes a bug with double cousins, where there are 4 common ancestors,
+			// so uniqueness has to be applied to the four grandparents as well as the four parents
+			int unique = i / 2;
 			
 			// name the common ancestor relative to A, unless B is the common ancestor
 			String commonAncestorId = (distFrom2 == 0) 
@@ -78,7 +81,7 @@ public class RelationGraph {
 				} else { // use a name relative to A
 					rightId = getId(sourceName, j + 1, unique);
 				}
-				addVertex(rightId, leftId);
+				addEdge(rightId, leftId);
 			}
 			
 			// add relatives on B's side, starting from common ancestor, naming everyone relative to B
@@ -100,7 +103,7 @@ public class RelationGraph {
 				} else {
 					rightId = getId(targetName, j - 1);
 				}
-				addVertex(leftId, rightId);
+				addEdge(leftId, rightId);
 			}
 		}
 		
@@ -134,15 +137,29 @@ public class RelationGraph {
 	    String label;
 
 	    if (labelKey.getAncestorDistance() == 0) {
+		// simplest case, no possessives needed, so just name as A or B, e.g. "you", "niece"
 		label = labelKey.getLabel();
 	    } else {
+		// else name the ancestor relative to A or B
 
+		// special hack for double cousins
+	    	// normally we could just name the grandparents based on the ancestorId,
+		// but because of how dot orders the nodes, this
+		// will give us a weird-looking left-to-right ordering of the grandparent nodes
+		// so we change their label ids as follows:
+		// 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2		
+		int counterIdx = labelKey.getAncestorId();
+		if (maxAncestorsInSingleGeneration == 4 // double cousin case, where there are 4 grandparents
+			&& labelKey.getAncestorDistance() == 2) { // this node is one of the 4 grandparents
+		    	counterIdx += ((counterIdx % 2 == 0) ? 1 : - 1);
+		} 
+		
 		String possessive = labelKey.getLabel().equalsIgnoreCase("you") ? "r" : "'s";
 		label = new StringBuilder()
 		.append(labelKey.getLabel())
 		.append(possessive)
 		.append(' ')
-		.append(COUNTER_WORDS[labelKey.getAncestorId()])
+		.append(COUNTER_WORDS[counterIdx])
 		.append(createRelationString(labelKey.getAncestorDistance()))
 		.toString();
 	    }
@@ -194,7 +211,7 @@ public class RelationGraph {
 		
 	}
 
-	private void addVertex(String ancestorId, String descendantId) {
+	private void addEdge(String ancestorId, String descendantId) {
 		// DOT notation for a directed graph
 		nodeConnections.add(String.format("%s -> %s", ancestorId, descendantId));
 		
@@ -212,7 +229,7 @@ public class RelationGraph {
 		return labels.get(labelKey);
 	}
 	
-	private static class LabelKey {
+	private static class LabelKey implements Comparable<LabelKey> {
 		private String label;
 		private int ancestorDistance;
 		private int ancestorId;
@@ -272,6 +289,19 @@ public class RelationGraph {
 		public String toString() {
 			return "LabelKey [label=" + label + ", ancestorDistance="
 					+ ancestorDistance + ", ancestorId=" + ancestorId + "]";
+		}
+
+
+		public int compareTo(LabelKey other) {
+		    // sort by label, ancestorDistance, ancestorId
+		    // this ensures proper left-to-right ordering
+		    int compare;
+		    if ((compare = label.compareTo(other.label)) != 0) {
+			return compare;
+		    } else if ((compare = (ancestorDistance - other.ancestorDistance)) != 0) {
+			return compare;
+		    }
+		    return ancestorId - other.ancestorId;
 		}
 	}
 	
