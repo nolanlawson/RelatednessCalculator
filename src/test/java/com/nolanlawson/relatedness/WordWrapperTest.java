@@ -10,9 +10,10 @@ public class WordWrapperTest {
 	@Test
 	public void testWordWrapper() {
 		Assert.assertEquals("this is\nmy father", WordWrapper.wordWrap("  this is my father ", 16));
-		Assert.assertEquals("this is my\ngreat-grandfather", WordWrapper.wordWrap("  this is my great-grandfather ", 16));
+		Assert.assertEquals("this is just my\ngreat-grandfather", WordWrapper.wordWrap("  this is just my great-grandfather ", 20));
 		Assert.assertEquals("your nephew's\nparent", WordWrapper.wordWrap("  your nephew's parent ", 16));
-		
+		Assert.assertEquals("great-great-great-\ngreat-grandfather", 
+				WordWrapper.wordWrap("great-great-great-great-grandfather", 20));
 	}
 	
 }

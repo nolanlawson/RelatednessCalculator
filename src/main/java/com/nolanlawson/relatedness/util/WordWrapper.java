@@ -5,11 +5,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WordWrapper {
 
-	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
+	private static final Pattern TOKENIZER = Pattern.compile("\\S+?\\-|\\S+");
 	
 	/**
 	 * Attempt to replace spaces with newlines until all lines are less than the 
@@ -20,9 +21,11 @@ public class WordWrapper {
 	 * @return
 	 */
 	public static String wordWrap(String str, int desiredMaxLength) {
-		List<List<String>> lines = new ArrayList<List<String>>(
-				Collections.singletonList(
-						Arrays.asList(SPACE_PATTERN.split(str.trim()))));
+		List<List<String>> lines = new ArrayList<List<String>>(Collections.singletonList(new ArrayList<String>()));
+		Matcher matcher = TOKENIZER.matcher(str);
+		while (matcher.find()) {
+			lines.get(0).add(matcher.group());
+		}
 		
 		int index;
 		while ((index = shouldSplit(lines, desiredMaxLength)) != -1) {
@@ -35,7 +38,7 @@ public class WordWrapper {
 			if (i > 0) {
 				result.append('\n');
 			}
-			result.append(join(' ', line));
+			result.append(joinIfNotHyphenated(line));
 			i++;
 		}
 		return result.toString();
@@ -82,21 +85,27 @@ public class WordWrapper {
 	 */
 	private static int expectedLength(List<String> tokens) {
 		int length = 0;
-		for (String token : tokens) {
+		for (int i = 0; i < tokens.size(); i++) {
+			String token = tokens.get(i);
 			length += token.length();
+			if (i < tokens.size() - 1 && !token.endsWith("-")) {
+				length++; // for the space
+			}
 		}
-		return length + (tokens.size() - 1);
+		return length;
 	}
 	
-	private static CharSequence join(char delimiter, Collection<String> tokens) {
+	private static CharSequence joinIfNotHyphenated(List<String> tokens) {
 		StringBuilder stringBuilder = new StringBuilder();
-		int i = 0;
-		for (String token : tokens) {
-			if (i > 0) {
-				stringBuilder.append(delimiter);
-			}
+
+		for (int i = 0; i < tokens.size(); i++) {
+			String token = tokens.get(i);
 			stringBuilder.append(token);
-			i++;
+			
+			if (i < tokens.size() - 1) {
+				// only add a space if we didn't break on a hyphen
+				stringBuilder.append(token.endsWith("-") ? "" : " ");
+			}
 		}
 		return stringBuilder;
 	}
