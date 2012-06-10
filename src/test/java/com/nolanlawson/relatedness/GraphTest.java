@@ -32,6 +32,13 @@ public class GraphTest {
 		
 	}
 	
+	@Test
+	public void testWordWrapping() {
+		String graph = RelativeNameParser.parseGraph("half-brother's daughter").drawGraph();
+		System.out.println(graph);
+		Assert.assertTrue(graph.contains("Your half-\\nbrother's\\ndaughter"));
+	}
+	
 	private void testParsedGraph(String text, int expectedNumRelations, int expectedNumNodes) {
 		System.out.println(text);
 		String parsedGraph = RelativeNameParser.parseGraph(text).drawGraph();

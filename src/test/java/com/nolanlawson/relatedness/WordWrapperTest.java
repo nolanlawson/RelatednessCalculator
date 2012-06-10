@@ -14,6 +14,8 @@ public class WordWrapperTest {
 		Assert.assertEquals("your nephew's\nparent", WordWrapper.wordWrap("  your nephew's parent ", 16));
 		Assert.assertEquals("great-great-great-\ngreat-grandfather", 
 				WordWrapper.wordWrap("great-great-great-great-grandfather", 20));
+		Assert.assertEquals("your half-\nbrother's\ndaughter", 
+				WordWrapper.wordWrap("your half-brother's daughter", 16));
 	}
 	
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.nolanlawson.relatedness.CommonAncestor;
 import com.nolanlawson.relatedness.Relation;
+import com.nolanlawson.relatedness.RelationType;
 import com.nolanlawson.relatedness.util.WordWrapper;
 
 public class RelationGraph {
@@ -30,7 +31,7 @@ public class RelationGraph {
 	private Set<String> nodeConnections = new HashSet<String>();
 	
 	private NodeNameIterator nameIterator = new NodeNameIterator();
-	private int maxAncestorsInSingleGeneration = 1;
+	private int maxRelationsInSingleGeneration = 1;
 	
 	public RelationGraph() {
 	}
@@ -43,9 +44,12 @@ public class RelationGraph {
 	 */
 	public void addRelation(String sourceName, String targetName, Relation relation) {
 		
-	    	// update the max ancestors in a single generation
-	    	maxAncestorsInSingleGeneration = Math.max(maxAncestorsInSingleGeneration, 
-	    		relation.getCommonAncestors().size());
+	    // update the max relatives in a single generation
+		// Note that arcing relations guarantee that there will be at least
+		// two columns in the graph.
+	    maxRelationsInSingleGeneration = Math.max(maxRelationsInSingleGeneration, 
+	    		Math.max(RelationType.fromRelation(relation) == RelationType.Arcing ? 2 : 1, 
+	    				relation.getCommonAncestors().size()));
 	    
 		// draw the relation between two labels
 		
@@ -150,7 +154,7 @@ public class RelationGraph {
 		// so we change their label ids as follows:
 		// 0 -> 1, 1 -> 0, 2 -> 3, 3 -> 2		
 		int counterIdx = labelKey.getAncestorId();
-		if (maxAncestorsInSingleGeneration == 4 // double cousin case, where there are 4 grandparents
+		if (maxRelationsInSingleGeneration == 4 // double cousin case, where there are 4 grandparents
 			&& labelKey.getAncestorDistance() == 2) { // this node is one of the 4 grandparents
 		    	counterIdx += ((counterIdx % 2 == 0) ? 1 : - 1);
 		} 
@@ -175,7 +179,7 @@ public class RelationGraph {
 	    // How much we want to wrap the text depends on how many "columnns" dot is going to output.
 	    // And the number of columns is determined by the max number of ancestors in a single generation,
 	    // e.g. 1 for "parent," 2 for "sister," and 4 for "double cousin".
-	    switch (maxAncestorsInSingleGeneration) {
+	    switch (maxRelationsInSingleGeneration) {
 	    	case 4:
 			return TARGET_LABEL_LENGTH_FOUR_ANCESTORS;
 	    	case 1:
