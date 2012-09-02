@@ -55,11 +55,12 @@ public class Trie<T> {
 	    currentNode = currentNode.next.get(ch);
 	    if (currentNode == null) { // reached a leaf node in the trie
 		return Collections.emptyList();
-	    } else if (currentNode.value != null) {
-		return Collections.singletonList(currentNode.value);
 	    }
 	}
 	List<T> result = Lists.newArrayList();
+	if (currentNode.value != null) {
+	    result.add(currentNode.value);
+	}
 	getAllRecursive(currentNode, result);
 	return result;
     }

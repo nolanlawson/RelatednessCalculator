@@ -29,7 +29,13 @@ public class SuggesterTest {
 		"half-niece", "half-fifth cousin", "half-uncle", "half-nephew", "half-aunt", "half-third cousin");
 	testSuggestions(10, "", "grandchild", "child", "grandpa", "granddaughter", "daughter", "grandparent", 
 		"cousin", "aunt", "grandma", "father");
-	//testSuggestions(2, "grandpa", "grandpa's father", "grandpa's cousin");
+	testSuggestions(10, "grandpa", "grandpa's great-aunt", "grandpa's aunt", "grandpa's grandparent", 
+		"grandpa's great-grandma", "grandpa", "grandpa's grandma", "grandpa's father", "grandpa's cousin", 
+		"grandpa's grandpa", "grandparent");
+	testSuggestions(1, "grandparentxxxxxx");
+	testSuggestions(1, "grandpa'", "grandpa's aunt");
+	testSuggestions(1, "grandpa's", "grandpa's aunt");
+	testSuggestions(1, "grandpa's ", "grandpa's aunt");
     }
     
     private void testSuggestions(int limit, String input, String... outputs) {

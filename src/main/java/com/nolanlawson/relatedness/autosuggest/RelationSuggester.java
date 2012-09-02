@@ -21,13 +21,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.nolanlawson.relatedness.BasicRelation;
+import com.nolanlawson.relatedness.UnknownRelationException;
 import com.nolanlawson.relatedness.parser.ParseVocabulary;
+import com.nolanlawson.relatedness.parser.RelationParseResult;
+import com.nolanlawson.relatedness.parser.RelativeNameParser;
 
 /**
  * Used for autosuggesting relations.
@@ -125,14 +129,60 @@ public class RelationSuggester {
 
     public List<String> suggest(String input, int limit) {
 	// sort by weight, then the relation string, then limit the list and return it
-	List<WeightedRelation> result = trie.getAll(input);
-	return Lists.newArrayList(
+	List<WeightedRelation> trieResult = trie.getAll(input.toLowerCase());
+	List<String> result = Lists.newArrayList(
 		Iterables.transform(
 		Iterables.limit(
-			Ordering.natural().sortedCopy(result), limit), 
+			Ordering.natural().sortedCopy(trieResult), limit), 
 			WeightedRelation.getRelationFunction));
+	
+	if (result.size() < limit && result.contains(input.toLowerCase())) {
+	    // there's very few results and it contains the same name as the input (e.g. "grandpa"), so expand it with
+	    // possible additional relations, such as "grandpa's cousin" or "grandpa's second cousin"
+	    result.addAll(expandWithCompoundRelations(0, input, limit - result.size()));
+	}
+	// also account for cases where the user has just typed "'", "'s", or "'s "
+	String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
+	for (int i = 0; i < fullPossessive.length(); i++) {
+	    if (input.endsWith(fullPossessive.substring(0, fullPossessive.length() - i))) {
+		result.addAll(expandWithCompoundRelations(fullPossessive.length() - i, input, limit - result.size()));
+	    }
+	}
+	return result;
     }
-    
-    
-    
+
+    private List<String> expandWithCompoundRelations(final int possessiveStringIndex, final String input, int limit) {
+	
+	final String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
+	
+	// have to check and make sure we don't add nonsensical relations, like "cousin's uncle"
+	List<WeightedRelation> allPossibleWeightedRelations = trie.getAll("");
+	
+	// order them first, so we don't waste too much time checking them all
+	List<String> sortedPossibleRelations = Lists.newArrayList(
+		Iterables.transform(
+			Ordering.natural().sortedCopy(allPossibleWeightedRelations), 
+		new Function<WeightedRelation, String>(){
+
+		    public String apply(WeightedRelation weightedRelation) {
+			return input + fullPossessive.substring(possessiveStringIndex) + weightedRelation.getRelation();
+		    }
+		}));
+	
+	List<String> result = Lists.newArrayList();
+	// check one-by-one that the relation makes sense
+	for (String possibleRelation : sortedPossibleRelations) {
+	    if (result.size() >= limit) {
+		break;
+	    } else {
+		try {
+		    RelationParseResult parseResult = RelativeNameParser.parse(possibleRelation);
+		    if (parseResult.getParseError() == null) { // no error, so add
+			result.add(possibleRelation);
+		    }
+		} catch (UnknownRelationException ignore) {}
+	    }
+	}
+	return result;
+    }
 }
