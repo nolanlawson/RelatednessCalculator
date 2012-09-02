@@ -142,6 +142,14 @@ public class ParserTest {
 		
 	}
 	
+	@Test
+	public void testGrandpa() {
+	    // test grandpa!  test him!!
+	    testEquals("granpa", new Relation(new CommonAncestor(2,0)));
+	    testEquals("grampa", new Relation(new CommonAncestor(2,0)));
+	    
+	}
+	
 	private void testEquals(String name, BasicRelation basicRelation) {
 		testEquals(name, basicRelation.getRelation());
 	}

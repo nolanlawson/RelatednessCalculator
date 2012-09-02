@@ -54,7 +54,7 @@ public class RelativeNameParser {
 
 	private static final List<String> GRANDPARENT_NAMES = Arrays.asList(
 			"grandpa", "grandma", "grandparent", "grammy", "grampy", "gramps", "gramma", "grandfather", "grandmother",
-			"granddad", "granddaddy", "grand dad", "grand daddy");
+			"granddad", "granddaddy", "grand dad", "grand daddy", "granpa", "grampa");
 	private static final List<String> GRANDCHILD_NAMES = Arrays.asList(
 			"grandchild", "grandson", "granddaughter");
 	private static final List<String> AUNT_OR_UNCLE_NAMES = Arrays.asList(
