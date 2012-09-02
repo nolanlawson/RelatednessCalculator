@@ -51,7 +51,8 @@ public class ParseVocabulary {
     public static final Set<BasicRelation> GREATABLE_RELATIONS = EnumSet.of(
 	    Grandparent, Grandchild, AuntOrUncle, NieceOrNephew);
     public static final Set<BasicRelation> HALFABLE_RELATIONS = EnumSet.of(
-	    Sibling, Cousin, AuntOrUncle, NieceOrNephew);
+	    Sibling, Cousin, AuntOrUncle, NieceOrNephew, SecondCousin, ThirdCousin, FourthCousin,
+	    FifthCousin, SixthCousin, SeventhCousin, EighthCousin);
 
     public static final ImmutableMultimap<BasicRelation, String> VOCABULARY = new ImmutableMultimap.Builder<BasicRelation, String>()
 	    .putAll(Parent, "parent", "father", "mother", "dad", "mom", "mum",

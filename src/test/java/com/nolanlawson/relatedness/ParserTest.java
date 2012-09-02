@@ -66,6 +66,9 @@ public class ParserTest {
 		testEquals("half-cousin", new Relation(new CommonAncestor(2,2)));
 		testEquals("halfcousin", new Relation(new CommonAncestor(2,2)));
 		testEquals("half aunt", new Relation(new CommonAncestor(2,1)));
+		testEquals("half second cousin", new Relation(new CommonAncestor(3, 3)));
+		testEquals("half third cousin", new Relation(new CommonAncestor(4, 4)));
+		testEquals("half fourth cousin", new Relation(new CommonAncestor(5, 5)));
 	}
 
 	@Test(expected=UnknownRelationException.class)
