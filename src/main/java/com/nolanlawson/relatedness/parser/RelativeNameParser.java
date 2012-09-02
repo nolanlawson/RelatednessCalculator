@@ -107,7 +107,7 @@ public class RelativeNameParser {
 			    RelationType.fromRelation(relation))) {
 		throw new UnknownRelationException(String.format(
 			"Cannot parse \"%s\" - this relationship makes no sense. "
-				+ "There must be a better way to phrase it.",
+				+ "Please think of a better way to phrase it.",
 			name.subSequence(0, matcher.end())));
 	    }
 	    
