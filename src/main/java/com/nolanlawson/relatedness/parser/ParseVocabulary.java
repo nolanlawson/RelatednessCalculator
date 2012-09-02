@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import com.nolanlawson.relatedness.BasicRelation;
@@ -54,9 +54,9 @@ public class ParseVocabulary {
 	    Sibling, Cousin, AuntOrUncle, NieceOrNephew, SecondCousin, ThirdCousin, FourthCousin,
 	    FifthCousin, SixthCousin, SeventhCousin, EighthCousin);
 
-    public static final String STEP = "step";
+    public static final Pattern STEP_PATTERN = Pattern.compile("step|in-law|inlaw");
     
-    public static final ImmutableMultimap<BasicRelation, String> VOCABULARY = new ImmutableMultimap.Builder<BasicRelation, String>()
+    public static final ImmutableListMultimap<BasicRelation, String> VOCABULARY = new ImmutableListMultimap.Builder<BasicRelation, String>()
 	    .putAll(Parent, "parent", "father", "mother", "dad", "mom", "mum",
 		    "pop", "daddy", "mommy", "mama", "mamma", "pops")
 	    .putAll(Child, "son", "daughter", "child", "kid")
@@ -84,6 +84,12 @@ public class ParseVocabulary {
     public static final String YOU = "You";
     public static final String YOUR = "Your";
 
+    public static final List<String> REMOVED_STRINGS_TO_SUGGEST =
+	    Arrays.asList("once", "twice", "thrice", "four times", "five times", "six times", "seven times", "eight times",
+		    "nine times");
+    
+    public static final String REMOVED = "removed";
+    
     // once removed, three times removes, etc.
     public static final String REMOVED_PATTERN = 
 	    "(?:once|twice|thrice|" +

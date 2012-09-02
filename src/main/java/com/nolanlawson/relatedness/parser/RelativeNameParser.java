@@ -65,7 +65,7 @@ public class RelativeNameParser {
 
 	name = name.trim();
 
-	if (name.contains(ParseVocabulary.STEP)) {
+	if (ParseVocabulary.STEP_PATTERN.matcher(name).find()) {
 	    RelationParseResult result = new RelationParseResult();
 	    result.setParseError(ParseError.StepRelation);
 	    return result;
