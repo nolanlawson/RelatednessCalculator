@@ -54,6 +54,8 @@ public class ParseVocabulary {
 	    Sibling, Cousin, AuntOrUncle, NieceOrNephew, SecondCousin, ThirdCousin, FourthCousin,
 	    FifthCousin, SixthCousin, SeventhCousin, EighthCousin);
 
+    public static final String STEP = "step";
+    
     public static final ImmutableMultimap<BasicRelation, String> VOCABULARY = new ImmutableMultimap.Builder<BasicRelation, String>()
 	    .putAll(Parent, "parent", "father", "mother", "dad", "mom", "mum",
 		    "pop", "daddy", "mommy", "mama", "mamma", "pops")

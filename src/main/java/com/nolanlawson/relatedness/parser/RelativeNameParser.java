@@ -65,6 +65,12 @@ public class RelativeNameParser {
 
 	name = name.trim();
 
+	if (name.contains(ParseVocabulary.STEP)) {
+	    RelationParseResult result = new RelationParseResult();
+	    result.setParseError(ParseError.StepRelation);
+	    return result;
+	}
+	
 	Matcher matcher = RELATIVE_PATTERN.matcher(name);
 	List<CommonAncestor> currentAncestors = null;
 	Relation previousRelation = null;

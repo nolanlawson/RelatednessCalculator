@@ -13,6 +13,12 @@ import com.nolanlawson.relatedness.parser.RelativeNameParser;
 public class ComplexParserTest {
 
     @Test
+    public void testMistakeHandling() {
+	RelationParseResult result = RelativeNameParser.parse("step-daughter");
+	Assert.assertEquals(ParseError.StepRelation, result.getParseError());
+    }
+    
+    @Test
     public void testNTimesRemoved() {
 	testAmbiguousParse("cousin once removed", "cousin's child", "parent's cousin");
 	testAmbiguousParse("second cousin, 2 times removed", "second cousin's grandchild", "grandparent's second cousin");

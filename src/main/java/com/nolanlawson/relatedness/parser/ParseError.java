@@ -6,6 +6,7 @@ package com.nolanlawson.relatedness.parser;
  *
  */
 public enum ParseError {
-    Ambiguity,;
+    Ambiguity,
+    StepRelation;
     
 }
