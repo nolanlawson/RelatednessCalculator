@@ -155,7 +155,7 @@ public class ParserTest {
 	}
 	
 	private void testEquals(String name, Relation expectedRelation) {
-		Relation relation = RelativeNameParser.parse(name);
+		Relation relation = RelativeNameParser.parse(name).getRelation();
 		Assert.assertEquals(expectedRelation, relation);	
 	}
 }

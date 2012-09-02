@@ -34,14 +34,14 @@ public class GraphTest {
 	
 	@Test
 	public void testWordWrapping() {
-		String graph = RelativeNameParser.parseGraph("half-brother's daughter").drawGraph();
+		String graph = RelativeNameParser.parse("half-brother's daughter", true).getGraph().drawGraph();
 		System.out.println(graph);
 		Assert.assertTrue(graph.contains("Your half-\\nbrother's\\ndaughter"));
 	}
 	
 	private void testParsedGraph(String text, int expectedNumRelations, int expectedNumNodes) {
 		System.out.println(text);
-		String parsedGraph = RelativeNameParser.parseGraph(text).drawGraph();
+		String parsedGraph = RelativeNameParser.parse(text, true).getGraph().drawGraph();
 		System.out.println(parsedGraph);
 		Assert.assertEquals(expectedNumRelations, countOf(parsedGraph, "->"));
 		Assert.assertEquals(expectedNumNodes, countOf(parsedGraph, "[label"));
