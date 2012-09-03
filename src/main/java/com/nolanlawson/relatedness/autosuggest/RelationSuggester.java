@@ -1,5 +1,5 @@
 package com.nolanlawson.relatedness.autosuggest;
-
+import static com.nolanlawson.relatedness.BasicRelation.*;
 import static com.nolanlawson.relatedness.BasicRelation.AuntOrUncle;
 import static com.nolanlawson.relatedness.BasicRelation.Child;
 import static com.nolanlawson.relatedness.BasicRelation.DoubleFirstCousin;
@@ -52,6 +52,9 @@ public class RelationSuggester {
     private static final Set<BasicRelation> TWO_NAME_RELATIONS = EnumSet.of(
 	    AuntOrUncle, NieceOrNephew);
     
+    private static final Set<BasicRelation> COUSINS = EnumSet.of(Cousin, SecondCousin, ThirdCousin, FourthCousin,
+	    FifthCousin, SixthCousin, SeventhCousin, EighthCousin);
+    
     
     // relations to de-prioritize in the suggestions results because they're uncommon, also make sure
     // that e.g. third cousins are suggested before fourth cousins, etc.
@@ -103,8 +106,8 @@ public class RelationSuggester {
 	    
 	    for (int i = 0 ; i < names.size(); i++) {
 		String name = names.get(i);
-		double weightToUse = i < numNamesToPrioritize ? initialWeight : initialWeight / 2;
-		result.add(new WeightedRelation(name, weightToUse));
+		double reducedWeight = i < numNamesToPrioritize ? initialWeight : initialWeight / 2;
+		result.add(new WeightedRelation(name, reducedWeight));
 	    }
 	    
 	    if (ParseVocabulary.GREATABLE_RELATIONS.contains(basicRelation)) {
@@ -124,6 +127,18 @@ public class RelationSuggester {
 		// add "half"s as well
 		for (String nameToUse : namesToPrioritize) {
 		    result.add(new WeightedRelation(ParseVocabulary.HALF + "-" + nameToUse, initialWeight));
+		}
+	    }
+	    
+	    // I'm also going to allow "X removed" for all cousins, without the comma
+	    if (COUSINS.contains(basicRelation)) {
+		double removedWeight = initialWeight;
+		for (String timesRemoved : ParseVocabulary.REMOVED_STRINGS_TO_SUGGEST) {
+		    removedWeight /= 2;
+		    for (String name : names) {
+			String removedName = name + " " + timesRemoved + " " + ParseVocabulary.REMOVED;
+			result.add(new WeightedRelation(removedName, removedWeight));
+		    }
 		}
 	    }
 	}
