@@ -35,6 +35,9 @@ import com.nolanlawson.relatedness.parser.RelativeNameParser;
 
 /**
  * Used for autosuggesting relations.
+ * 
+ * This is really some of the worst code I've ever written.  I wish I had started from scratch with a Finite
+ * State Transducer or something.  This is just ugly as hell.  But hey, at least it works.
  * @author nolan
  *
  */
@@ -139,24 +142,33 @@ public class RelationSuggester {
 	if (result.size() < limit && result.contains(input.toLowerCase())) {
 	    // there's very few results and it contains the same name as the input (e.g. "grandpa"), so expand it with
 	    // possible additional relations, such as "grandpa's cousin" or "grandpa's second cousin"
-	    result.addAll(expandWithCompoundRelations(0, input, limit - result.size()));
+	    result.addAll(expandWithCompoundRelations(0, input, "", limit - result.size()));
 	}
 	// also account for cases where the user has just typed "'", "'s", or "'s "
 	String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
 	for (int i = 0; i < fullPossessive.length(); i++) {
 	    if (input.endsWith(fullPossessive.substring(0, fullPossessive.length() - i))) {
-		result.addAll(expandWithCompoundRelations(fullPossessive.length() - i, input, limit - result.size()));
+		result.addAll(expandWithCompoundRelations(fullPossessive.length() - i, input, "", limit - result.size()));
 	    }
 	}
+	// next, account for cases where the user typed 's plus something else
+	int lastIndexOfPossessive = input.lastIndexOf(fullPossessive);
+	int endOfLastPossessive = lastIndexOfPossessive + fullPossessive.length();
+	if (lastIndexOfPossessive != -1 && endOfLastPossessive < input.length() - 1) {
+	    String postPossessiveString = input.substring(endOfLastPossessive);
+	    result.addAll(expandWithCompoundRelations(0, input.substring(0, lastIndexOfPossessive), 
+		    postPossessiveString, limit));
+	}
+	
 	return result;
     }
 
-    private List<String> expandWithCompoundRelations(final int possessiveStringIndex, final String input, int limit) {
+    private List<String> expandWithCompoundRelations(final int possessiveStringIndex, final String input, String searchString, int limit) {
 	
 	final String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
 	
 	// have to check and make sure we don't add nonsensical relations, like "cousin's uncle"
-	List<WeightedRelation> allPossibleWeightedRelations = trie.getAll("");
+	List<WeightedRelation> allPossibleWeightedRelations = trie.getAll(searchString);
 	
 	// order them first, so we don't waste too much time checking them all
 	List<String> sortedPossibleRelations = Lists.newArrayList(

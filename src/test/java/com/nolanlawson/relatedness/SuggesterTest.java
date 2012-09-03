@@ -36,6 +36,11 @@ public class SuggesterTest {
 	testSuggestions(1, "grandpa'", "grandpa's aunt");
 	testSuggestions(1, "grandpa's", "grandpa's aunt");
 	testSuggestions(1, "grandpa's ", "grandpa's aunt");
+	testSuggestions(1, "grandpa's cous", "grandpa's cousin");
+	testSuggestions(1, "grandpa's grandso"); // illogical
+	testSuggestions(1, "father's brother's daugh", "father's brother's daughter");
+	testSuggestions(1, "father's brother's daughter's daugh", "father's brother's daughter's daughter");
+	
     }
     
     private void testSuggestions(int limit, String input, String... outputs) {

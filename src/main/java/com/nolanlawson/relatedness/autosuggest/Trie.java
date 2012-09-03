@@ -11,8 +11,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
- * Simple, efficient implementation of a trie that maps prefixes to objects of
- * the generic type.
+ * Simple implementation of a WFST (Weighted Finite State Transducer) that is intended to be used for autosuggestions.
+ * 
+ * Define a vocabulary, define links between vocabulary items, and define linking text between the vocabulary items.
+ * Vocabulary items are weighted as log probabilities that get added (i.e. probabilities are multipled) as the algorithm
+ * walks down the tree.
+ * 
  * 
  * @author nlawson
  * 
