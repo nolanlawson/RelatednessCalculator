@@ -42,6 +42,7 @@ public class SuggesterTest {
 	testSuggestions(1, "father's brother's daughter's daugh", "father's brother's daughter's daughter");
 	testSuggestions(1, "first cousin tw", "first cousin twice removed");
 	testSuggestions(1, "second cousin o", "second cousin once removed");
+	testSuggestions(2, "cousin", "cousin", "cousin's child");
 	
     }
     

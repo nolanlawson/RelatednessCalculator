@@ -1,7 +1,7 @@
 package com.nolanlawson.relatedness.autosuggest;
-import static com.nolanlawson.relatedness.BasicRelation.*;
 import static com.nolanlawson.relatedness.BasicRelation.AuntOrUncle;
 import static com.nolanlawson.relatedness.BasicRelation.Child;
+import static com.nolanlawson.relatedness.BasicRelation.Cousin;
 import static com.nolanlawson.relatedness.BasicRelation.DoubleFirstCousin;
 import static com.nolanlawson.relatedness.BasicRelation.EighthCousin;
 import static com.nolanlawson.relatedness.BasicRelation.FifthCousin;
@@ -10,6 +10,7 @@ import static com.nolanlawson.relatedness.BasicRelation.Grandchild;
 import static com.nolanlawson.relatedness.BasicRelation.Grandparent;
 import static com.nolanlawson.relatedness.BasicRelation.NieceOrNephew;
 import static com.nolanlawson.relatedness.BasicRelation.Parent;
+import static com.nolanlawson.relatedness.BasicRelation.SecondCousin;
 import static com.nolanlawson.relatedness.BasicRelation.SeventhCousin;
 import static com.nolanlawson.relatedness.BasicRelation.SixthCousin;
 import static com.nolanlawson.relatedness.BasicRelation.ThirdCousin;
@@ -134,7 +135,7 @@ public class RelationSuggester {
 	    if (COUSINS.contains(basicRelation)) {
 		double removedWeight = initialWeight;
 		for (String timesRemoved : ParseVocabulary.REMOVED_STRINGS_TO_SUGGEST) {
-		    removedWeight /= 2;
+		    removedWeight /= 4;
 		    for (String name : names) {
 			String removedName = name + " " + timesRemoved + " " + ParseVocabulary.REMOVED;
 			result.add(new WeightedRelation(removedName, removedWeight));
@@ -147,23 +148,18 @@ public class RelationSuggester {
 
     public List<String> suggest(String input, int limit) {
 	// sort by weight, then the relation string, then limit the list and return it
-	List<WeightedRelation> trieResult = trie.getAll(input.toLowerCase());
-	List<String> result = Lists.newArrayList(
-		Iterables.transform(
-		Iterables.limit(
-			Ordering.natural().sortedCopy(trieResult), limit), 
-			WeightedRelation.getRelationFunction));
+	List<WeightedRelation> result = Lists.newArrayList(trie.getAll(input.toLowerCase()));
 	
-	if (result.size() < limit && result.contains(input.toLowerCase())) {
+	if (Iterables.contains(Iterables.transform(result, WeightedRelation.getRelationFunction),input.toLowerCase())) {
 	    // there's very few results and it contains the same name as the input (e.g. "grandpa"), so expand it with
 	    // possible additional relations, such as "grandpa's cousin" or "grandpa's second cousin"
-	    result.addAll(expandWithCompoundRelations(0, input, "", limit - result.size()));
+	    result.addAll(expandWithCompoundRelations(0, input, "", limit));
 	}
 	// also account for cases where the user has just typed "'", "'s", or "'s "
 	String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
 	for (int i = 0; i < fullPossessive.length(); i++) {
 	    if (input.endsWith(fullPossessive.substring(0, fullPossessive.length() - i))) {
-		result.addAll(expandWithCompoundRelations(fullPossessive.length() - i, input, "", limit - result.size()));
+		result.addAll(expandWithCompoundRelations(fullPossessive.length() - i, input, "", limit));
 	    }
 	}
 	// next, account for cases where the user typed 's plus something else
@@ -175,10 +171,17 @@ public class RelationSuggester {
 		    postPossessiveString, limit));
 	}
 	
-	return result;
+	// sort, limit, and transform
+	
+	return Lists.newArrayList(
+		Iterables.transform( 
+			Iterables.limit(Ordering.natural().sortedCopy(result),
+			limit),
+		WeightedRelation.getRelationFunction));
     }
 
-    private List<String> expandWithCompoundRelations(final int possessiveStringIndex, final String input, String searchString, int limit) {
+    private List<WeightedRelation> expandWithCompoundRelations(final int possessiveStringIndex, final String input, 
+	    String searchString, int limit) {
 	
 	final String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
 	
@@ -186,24 +189,26 @@ public class RelationSuggester {
 	List<WeightedRelation> allPossibleWeightedRelations = trie.getAll(searchString);
 	
 	// order them first, so we don't waste too much time checking them all
-	List<String> sortedPossibleRelations = Lists.newArrayList(
+	List<WeightedRelation> sortedPossibleRelations = Lists.newArrayList(
 		Iterables.transform(
 			Ordering.natural().sortedCopy(allPossibleWeightedRelations), 
-		new Function<WeightedRelation, String>(){
+		new Function<WeightedRelation, WeightedRelation>(){
 
-		    public String apply(WeightedRelation weightedRelation) {
-			return input + fullPossessive.substring(possessiveStringIndex) + weightedRelation.getRelation();
+		    public WeightedRelation apply(WeightedRelation weightedRelation) {
+			String relationName = input + fullPossessive.substring(possessiveStringIndex) + weightedRelation.getRelation();
+			double weight = weightedRelation.getWeight() / 2; // cut it in half for compound relations to de-prioritize them
+			return new WeightedRelation(relationName, weight);
 		    }
 		}));
 	
-	List<String> result = Lists.newArrayList();
+	List<WeightedRelation> result = Lists.newArrayList();
 	// check one-by-one that the relation makes sense
-	for (String possibleRelation : sortedPossibleRelations) {
+	for (WeightedRelation possibleRelation : sortedPossibleRelations) {
 	    if (result.size() >= limit) {
 		break;
 	    } else {
 		try {
-		    RelationParseResult parseResult = RelativeNameParser.parse(possibleRelation);
+		    RelationParseResult parseResult = RelativeNameParser.parse(possibleRelation.getRelation());
 		    if (parseResult.getParseError() == null) { // no error, so add
 			result.add(possibleRelation);
 		    }
