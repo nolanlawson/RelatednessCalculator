@@ -20,23 +20,24 @@ import com.google.common.collect.Sets;
  */
 public class SparseCharArray<T> extends AbstractMap<Character, T> {
 
-    private int startIdx;
-    private Object[] data;
-    private int[] entries;
-
     private SparseCharArray() {
     }
 
+    /**
+     * Creates a new SparseCharArray from the given map.  
+     * @param inputMap
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static <T> SparseCharArray<T> fromMap(Map<Character, T> inputMap) {
-	SparseCharArray<T> result = new SparseCharArray<T>();
-
 	if (inputMap.isEmpty()) {
 	    return (SparseCharArray<T>) EMPTY;
 	} else if (inputMap.size() == 1) {
 	    return new SingletonSparseCharArray<T>(inputMap.keySet().iterator()
 		    .next(), inputMap.values().iterator().next());
 	}
+	
+	MultiSparseCharArray<T> result = new MultiSparseCharArray<T>();
 
 	result.startIdx = Ordering.natural().min(inputMap.keySet());
 	int maxIdx = Ordering.natural().max(inputMap.keySet());
@@ -53,36 +54,63 @@ public class SparseCharArray<T> extends AbstractMap<Character, T> {
 	return result;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Set<Entry<Character, T>> entrySet() {
-	Set<Entry<Character, T>> result = Sets.newHashSet();
-	for (int i = 0; i < entries.length; i++) {
-	    int entry = entries[i];
-	    result.add(new SCAEntry<T>(Character
-		    .valueOf(((char) (entry + startIdx))), (T) data[entry]));
-	}
-	return result;
+	throw new UnsupportedOperationException(); // implemented in subclasses
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public T get(Object key) {
-	int idx = ((int)(Character) key) - startIdx;
-	if (idx < 0 || idx >= data.length) {
-	    return null;
-	}
-	return (T) data[idx];
-    }
-
+    /**
+     * Unchanging empty sparse char array.
+     */
     @SuppressWarnings("rawtypes")
-    private static final SparseCharArray<?> EMPTY = new SparseCharArray();
+    private static final MultiSparseCharArray<?> EMPTY = new MultiSparseCharArray();
     static {
 	EMPTY.startIdx = 0;
 	EMPTY.data = new Object[0];
 	EMPTY.entries = new int[0];
     }
+    
+    /**
+     * SparseCharArray with >1 entries.
+     * @author nolan
+     *
+     * @param <T>
+     */
+    private static class MultiSparseCharArray<T> extends SparseCharArray<T> {
+	    private int startIdx;
+	    private Object[] data;
+	    private int[] entries;
+	    
+	    @SuppressWarnings("unchecked")
+	    @Override
+	    public T get(Object key) {
+		int idx = ((int)(Character) key) - startIdx;
+		if (idx < 0 || idx >= data.length) {
+		    return null;
+		}
+		return (T) data[idx];
+	    }
+	    
+	    @SuppressWarnings("unchecked")
+	    @Override
+	    public Set<Entry<Character, T>> entrySet() {
+		Set<Entry<Character, T>> result = Sets.newHashSet();
+		for (int i = 0; i < entries.length; i++) {
+		    int entry = entries[i];
+		    result.add(new SCAEntry<T>(Character
+			    .valueOf(((char) (entry + startIdx))), (T) data[entry]));
+		}
+		return result;
+	    }
+    }
 
+    /**
+     * SparseCharArray with only 1 entry.  Incredibly, this takes up less space than Collections.singletonMap(),
+     * because singletonMap relies on an inner singletonSet.
+     * @author nolan
+     *
+     * @param <T>
+     */
     private static class SingletonSparseCharArray<T> extends SparseCharArray<T> {
 
 	private int singleKey;
@@ -109,6 +137,12 @@ public class SparseCharArray<T> extends AbstractMap<Character, T> {
 
     }
 
+    /**
+     * Basic Map.Entry object, nothing fancy.
+     * @author nolan
+     *
+     * @param <T>
+     */
     private static class SCAEntry<T> implements Entry<Character, T> {
 
 	private Character key;
