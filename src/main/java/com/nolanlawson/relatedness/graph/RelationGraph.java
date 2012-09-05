@@ -29,12 +29,13 @@ public class RelationGraph {
 	// sort by name so that e.g. "grandparent" appears before "other grandparent" appears before "third grandparent"...
 	private Map<LabelKey,String> labels = new LinkedHashMap<LabelKey,String>();
 	private Set<String> nodeConnections = new HashSet<String>();
-	
+
 	private NodeNameIterator nameIterator = new NodeNameIterator();
 	private int maxRelationsInSingleGeneration = 1;
 	
 	public RelationGraph() {
 	}
+
 	
 	/**
 	 * Add a relation to the drawing
@@ -122,11 +123,21 @@ public class RelationGraph {
 			LabelKey labelKey = entry.getKey();
 			String id = entry.getValue();
 			
+            // emphasize certain nodes for understandability, e.g. "you" and "your cousin",
+			// but not everything in between
+			boolean emphasize = labelKey.getAncestorDistance() == 0;
+			
 			// DOT format for declaring a node
 			stringBuilder.append(id)
                                 .append(" [label=\"")
                                 .append(createHumanReadableLabel(labelKey))
-                                .append("\"];\n");
+                                .append("\"")
+                                .append(", fontname=\"Helvetica\"")
+                                .append(emphasize
+                                	? ", color=\"#788c45\", penwidth=\"3.0\", " +
+                                			"style=\"filled\", fillcolor=\"#f6f6f6\""
+                                	: "")
+                                .append("];\n");
 		}
 		for (CharSequence nodeConnection : nodeConnections) {
 			stringBuilder.append(nodeConnection).append(";\n");
