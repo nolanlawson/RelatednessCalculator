@@ -2,6 +2,7 @@ package com.nolanlawson.relatedness.autosuggest;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ComparisonChain;
+import com.nolanlawson.relatedness.util.Trie.TrieLeaf;
 
 
 public class WeightedRelation implements Comparable<WeightedRelation> {
@@ -45,5 +46,13 @@ public class WeightedRelation implements Comparable<WeightedRelation> {
 	public String apply(WeightedRelation input) {
 	    return input.getRelation();
 	}
+    };
+    
+    public static Function<TrieLeaf<Double>, WeightedRelation> fromTrieLeafFunction = 
+	    new Function<TrieLeaf<Double>, WeightedRelation>() {
+
+		public WeightedRelation apply(TrieLeaf<Double> input) {
+		    return new WeightedRelation(input.getKey().toString(), input.getValue());
+		}
     };
 }

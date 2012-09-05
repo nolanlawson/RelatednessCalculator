@@ -33,6 +33,7 @@ import com.nolanlawson.relatedness.UnknownRelationException;
 import com.nolanlawson.relatedness.parser.ParseVocabulary;
 import com.nolanlawson.relatedness.parser.RelationParseResult;
 import com.nolanlawson.relatedness.parser.RelativeNameParser;
+import com.nolanlawson.relatedness.util.Trie;
 
 /**
  * Used for autosuggesting relations.
@@ -70,7 +71,7 @@ public class RelationSuggester {
 	    .put(EighthCousin, 1.0 / 7)
 	    .build();
     
-    private Trie<WeightedRelation> trie;
+    private Trie<Double> trie;
     
     public RelationSuggester() {
 	initTrie();
@@ -80,8 +81,9 @@ public class RelationSuggester {
 	trie = Trie.newTrie();
 	List<WeightedRelation> suggestions = generateSuggestions();
 	for (WeightedRelation suggestion : suggestions) {
-	    trie.put(suggestion.getRelation(), suggestion);
+	    trie.put(suggestion.getRelation(), suggestion.getWeight());
 	}
+	trie.compile();
     }
     
     private List<WeightedRelation> generateSuggestions() {
@@ -148,7 +150,9 @@ public class RelationSuggester {
 
     public List<String> suggest(String input, int limit) {
 	// sort by weight, then the relation string, then limit the list and return it
-	List<WeightedRelation> result = Lists.newArrayList(trie.getAll(input.toLowerCase()));
+	List<WeightedRelation> result = Lists.newArrayList(
+		Iterables.transform(trie.getAll(input.toLowerCase()),
+			WeightedRelation.fromTrieLeafFunction));
 	
 	if (Iterables.contains(Iterables.transform(result, WeightedRelation.getRelationFunction),input.toLowerCase())) {
 	    // there's very few results and it contains the same name as the input (e.g. "grandpa"), so expand it with
@@ -186,7 +190,9 @@ public class RelationSuggester {
 	final String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
 	
 	// have to check and make sure we don't add nonsensical relations, like "cousin's uncle"
-	List<WeightedRelation> allPossibleWeightedRelations = trie.getAll(searchString);
+	List<WeightedRelation> allPossibleWeightedRelations = Lists.newArrayList(
+		Iterables.transform(trie.getAll(searchString),
+			WeightedRelation.fromTrieLeafFunction));
 	
 	// order them first, so we don't waste too much time checking them all
 	List<WeightedRelation> sortedPossibleRelations = Lists.newArrayList(
