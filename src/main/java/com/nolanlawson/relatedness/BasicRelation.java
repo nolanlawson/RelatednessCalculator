@@ -49,6 +49,9 @@ public enum BasicRelation {
 	// so their kids share all 4 grandparents
 	DoubleFirstCousin (new Relation(new CommonAncestor(2, 2), new CommonAncestor(2, 2), 
 			new CommonAncestor(2, 2) , new CommonAncestor(2, 2))),
+			
+	IdenticalTwin (new Relation(2, new CommonAncestor(1,1), new CommonAncestor(1,1)));
+	
 	;
 	
 	private Relation relation;

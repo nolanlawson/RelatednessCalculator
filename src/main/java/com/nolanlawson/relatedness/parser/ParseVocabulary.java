@@ -9,6 +9,7 @@ import static com.nolanlawson.relatedness.BasicRelation.FifthCousin;
 import static com.nolanlawson.relatedness.BasicRelation.FourthCousin;
 import static com.nolanlawson.relatedness.BasicRelation.Grandchild;
 import static com.nolanlawson.relatedness.BasicRelation.Grandparent;
+import static com.nolanlawson.relatedness.BasicRelation.IdenticalTwin;
 import static com.nolanlawson.relatedness.BasicRelation.NieceOrNephew;
 import static com.nolanlawson.relatedness.BasicRelation.Parent;
 import static com.nolanlawson.relatedness.BasicRelation.SecondCousin;
@@ -54,13 +55,15 @@ public class ParseVocabulary {
 	    Sibling, Cousin, AuntOrUncle, NieceOrNephew, SecondCousin, ThirdCousin, FourthCousin,
 	    FifthCousin, SixthCousin, SeventhCousin, EighthCousin);
 
+    public static final Pattern AMBIGUOUS_TWIN_PATTERN = Pattern.compile("(?<!(?:fraternal|identical) )twin");
+    public static final List<String> AMBIGUOUS_TWIN_RESOLUTIONS = Arrays.asList("fraternal twin", "identical twin");
     public static final Pattern STEP_PATTERN = Pattern.compile("step|in-law|inlaw");
     
     public static final ImmutableListMultimap<BasicRelation, String> VOCABULARY = new ImmutableListMultimap.Builder<BasicRelation, String>()
 	    .putAll(Parent, "parent", "father", "mother", "dad", "mom", "mum",
 		    "pop", "daddy", "mommy", "mama", "mamma", "pops")
 	    .putAll(Child, "son", "daughter", "child", "kid")
-	    .putAll(Sibling, "sibling", "brother", "sister", "sis", "bro")
+	    .putAll(Sibling, "sibling", "brother", "sister", "sis", "bro", "fraternal twin")
 	    .putAll(Cousin, "cousin", "first cousin", "1st cousin")
 	    .putAll(SecondCousin, "second cousin", "2nd cousin")
 	    .putAll(ThirdCousin, "third cousin", "3rd cousin")
@@ -74,6 +77,7 @@ public class ParseVocabulary {
 	    .putAll(AuntOrUncle, AUNT_OR_UNCLE_NAMES)
 	    .putAll(NieceOrNephew, "niece", "nephew")
 	    .putAll(DoubleFirstCousin, "double cousin", "double first cousin")
+	    .putAll(IdenticalTwin, "identical twin")
 	    .build();
 
     public static final Pattern SPACES_AND_HYPHENS = Pattern

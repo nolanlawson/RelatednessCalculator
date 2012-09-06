@@ -76,6 +76,8 @@ public class RelatednessCalculator {
 			coefficient += Math.pow(0.5, degree);
 		}
 		
+		coefficient *= relation.getRelatednessFactor();
+		
 		double averageDegree = calculateAverage(degrees);
 		
 		return new Relatedness(averageDegree, coefficient);

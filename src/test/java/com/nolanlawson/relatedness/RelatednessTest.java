@@ -17,8 +17,14 @@ import static com.nolanlawson.relatedness.BasicRelation.SecondCousin;
 import static com.nolanlawson.relatedness.BasicRelation.Self;
 import static com.nolanlawson.relatedness.BasicRelation.Sibling;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.nolanlawson.relatedness.parser.ParseError;
+import com.nolanlawson.relatedness.parser.RelationParseResult;
+import com.nolanlawson.relatedness.parser.RelativeNameParser;
 
 /**
  * Tests taken from calculations on http://en.wikipedia.org/wiki/Coefficient_of_relationship.
@@ -56,6 +62,29 @@ public class RelatednessTest {
 		testRelatedness(7, 0.015625, new Relation(new CommonAncestor(4, 3), new CommonAncestor(4, 3)));
 		
 	}
+	
+	@Test
+	public void testTwins() {
+	    testRelatedness(2, 1.0, RelativeNameParser.parse("identical twin").getRelation());
+	    testRelatedness(2, 0.5, RelativeNameParser.parse("fraternal twin").getRelation());
+	    testRelatedness(3, 0.25, RelativeNameParser.parse("fraternal twin's daughter").getRelation());
+	    testRelatedness(3, 0.5, RelativeNameParser.parse("identical twin's son").getRelation());
+	}
+	
+	@Test
+	public void testTwinAmbiguity() {
+	    testAmbiguity("twin", "fraternal twin", "identical twin");
+	    testAmbiguity("twin's daughter", "fraternal twin's daughter", "identical twin's daughter");
+	    testAmbiguity("father's twin", "father's fraternal twin", "father's identical twin");
+	}
+
+	
+	private void testAmbiguity(String input, String... resolutions) {
+	    RelationParseResult result = RelativeNameParser.parse(input);
+	    Assert.assertEquals(ParseError.Ambiguity, result.getParseError());
+	    Assert.assertEquals(Arrays.asList(resolutions), result.getAmbiguityResolutions());
+	}
+	
 	private void testRelatedness(double expectedDegree, double expectedCoefficient, Relation relation) {
 		Relatedness relatedness = RelatednessCalculator.calculate(relation);
 		Assert.assertEquals(expectedDegree, relatedness.getAverageDegree(), 0.0);

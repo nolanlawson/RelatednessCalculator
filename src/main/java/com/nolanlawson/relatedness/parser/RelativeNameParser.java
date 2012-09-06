@@ -18,8 +18,11 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.nolanlawson.relatedness.BasicRelation;
@@ -71,10 +74,16 @@ public class RelativeNameParser {
 	    return result;
 	}
 	
+	Matcher ambiguousTwinMatcher = ParseVocabulary.AMBIGUOUS_TWIN_PATTERN.matcher(name);
+	if (ambiguousTwinMatcher.find()) {
+	    return createAmbiguousTwinResult(ambiguousTwinMatcher, name);
+	}
+	
 	Matcher matcher = RELATIVE_PATTERN.matcher(name);
 	List<CommonAncestor> currentAncestors = null;
 	Relation previousRelation = null;
 	int lastIndex = 0;
+	int currentRelatednessFactor = 1;
 	while (matcher.find()) {
 
 	    // test to make sure there weren't any characters we skipped over
@@ -138,7 +147,7 @@ public class RelativeNameParser {
 		currentAncestors = doRelativeAddition(currentAncestors,
 			relation.getCommonAncestors());
 	    }
-
+	    currentRelatednessFactor *= relation.getRelatednessFactor();
 	    lastIndex = matcher.end();
 	    previousRelation = relation;
 	}
@@ -152,8 +161,29 @@ public class RelativeNameParser {
 	}
 
 	RelationParseResult result = new RelationParseResult();
-	result.setRelation(new Relation(currentAncestors));
+	result.setRelation(new Relation(currentRelatednessFactor, currentAncestors));
 	result.setGraph(graph);
+	return result;
+    }
+
+    private static RelationParseResult createAmbiguousTwinResult(
+	    final Matcher matcher, final String fullString) {
+	
+	// return the string with "fraternal twin" or "identical twin" replacing "twin"
+	List<String> resolutions = Lists.newArrayList(Iterables.transform(ParseVocabulary.AMBIGUOUS_TWIN_RESOLUTIONS, 
+		new Function<String, String>(){
+
+		    public String apply(String input) {
+			return new StringBuilder(fullString)
+				.replace(matcher.start(), matcher.end(), input)
+				.toString();
+		    }}
+		
+		));
+	
+	RelationParseResult result = new RelationParseResult();
+	result.setParseError(ParseError.Ambiguity);
+	result.setAmbiguityResolutions(resolutions);
 	return result;
     }
 
