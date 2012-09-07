@@ -77,6 +77,14 @@ public class RelatednessTest {
 	    testAmbiguity("twin's daughter", "fraternal twin's daughter", "identical twin's daughter");
 	    testAmbiguity("father's twin", "father's fraternal twin", "father's identical twin");
 	}
+	
+	@Test
+	public void testGreatsAndHalfs() {
+	    testRelatedness(4, 0.0625, RelativeNameParser.parse("great half niece").getRelation());
+	    testRelatedness(4, 0.0625, RelativeNameParser.parse("half great uncle").getRelation());
+	    testRelatedness(5, 0.03125, RelativeNameParser.parse("great great half uncle").getRelation());
+	    testRelatedness(5, 0.03125, RelativeNameParser.parse("half great great aunt").getRelation());
+	}
 
 	
 	private void testAmbiguity(String input, String... resolutions) {

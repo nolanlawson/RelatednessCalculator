@@ -102,13 +102,29 @@ public class ParseVocabulary {
     // 's is the English possessive clitic
     public static final String POSSESSIVE = "'s";
     
-    public static final String BASIC_RELATIVE_PATTERN = "((?:" + POSSESSIVE + "\\s+)?)" + // optional
-									   // possessive
-									   // "'s"
-	    "((?:" + GREAT + "[ -]?)*)" + // greats
-	    "((?:" + HALF + "[ -]?)?)" + // half
-	    "(%s)" +
-	    "([ ,]+" + REMOVED_PATTERN + ")?";
+    // one or more greats
+    private static final String GREATS_PATTERN = "((?:" + GREAT + "[ -]?)*)";
+    
+    // one or zero halfs
+    private static final String HALF_PATTERN = "((?:" + HALF + "[ -]?)?)";
+    
+    
+    public static final String BASIC_RELATIVE_PATTERN = 
+	    
+	    "((?:" + POSSESSIVE + "\\s+)?)" + // optional possessive "'s"
+    	    "(?:" +	
+    									    
+    	    // greats before half
+    	    GREATS_PATTERN +
+    	    HALF_PATTERN +
+    	    "|" +
+    	    // half before greats
+    	    HALF_PATTERN +
+    	    GREATS_PATTERN +
+    	    ")" +
+    	    
+    	    "(%s)" +
+    	    "([ ,]+" + REMOVED_PATTERN + ")?";
 
     private static final List<String> REMOVED_RESOLUTIONS = Arrays.asList("on", "tw", "thr", 
 	    "four", "five", "six", "seven", "eight", "nine");

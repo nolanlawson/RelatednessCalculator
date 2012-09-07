@@ -19,6 +19,8 @@ import java.util.regex.Matcher;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -195,7 +197,7 @@ public class RelativeNameParser {
      */
     private static List<String> determineAmbiguityResolutionsIfApplicable(
 	    Relation relation, Matcher matcher, String fullString) {
-	String removedString = matcher.group(5);
+	String removedString = matcher.group(7);
 	if (removedString == null || removedString.length() == 0) {
 	    return null; //  no ambiguity
 	}
@@ -207,11 +209,11 @@ public class RelativeNameParser {
 	
 	// return the string either followed by "'s <X>child" or preceded by "<X>parent's"
 	StringBuilder first = new StringBuilder(fullString);
-	first.replace(matcher.start(5), matcher.end(5), "");
+	first.replace(matcher.start(7), matcher.end(7), "");
 	first.insert(matcher.start(2), ascendingRelation + ParseVocabulary.POSSESSIVE + " ");
 	
 	StringBuilder second = new StringBuilder(fullString);
-	second.replace(matcher.start(5), matcher.end(5), ParseVocabulary.POSSESSIVE + " " + descendingRelation);
+	second.replace(matcher.start(7), matcher.end(7), ParseVocabulary.POSSESSIVE + " " + descendingRelation);
 	
 	return Arrays.asList(first.toString(), second.toString());
     }
@@ -221,15 +223,21 @@ public class RelativeNameParser {
 	return CharMatcher.JAVA_LETTER_OR_DIGIT.matchesAnyOf(interimText);
     }
 
-    private static Relation parseSingleRelation(Matcher matcher) {
+    private static Relation parseSingleRelation(final Matcher matcher) {
 	
-	String greats = matcher.group(2);
-	String half = matcher.group(3);
+	String greatsAndHalfs = Joiner.on("").join(Iterables.transform(
+		Arrays.asList(2,3,4,5), new Function<Integer,String>(){
+
+	    public String apply(Integer input) {
+		return Strings.nullToEmpty(matcher.group(input));
+	    }
+	}));
 	
-	int numGreats = countGreats(greats.toLowerCase());
-	boolean isHalf = half.length() > 0;
+	int numGreats = countGreats(greatsAndHalfs.toLowerCase());
+	boolean isHalf = greatsAndHalfs.toLowerCase().contains(ParseVocabulary.HALF);
+	
 	BasicRelation basicRelation = REVERSE_VOCABULARY
-		.get(collapseName(matcher.group(4)));
+		.get(collapseName(matcher.group(6)));
 
 	if (numGreats > 0 && !GREATABLE_RELATIONS.contains(basicRelation)) {
 	    // not an aunt, uncle, grandparent, grandkid, etc.
