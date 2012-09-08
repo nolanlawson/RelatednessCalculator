@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -101,6 +103,22 @@ public class Trie<T> {
      */
     public static <T> Trie<T> newTrie() {
 	return new Trie<T>();
+    }
+    
+    public String toString() {
+	SortedMap<String, T> allEndNodes = Maps.newTreeMap();
+	toStringRecursive(root, allEndNodes, new StringBuilder());
+	return "Trie<\n" + Joiner.on('\n').withKeyValueSeparator(": ").join(allEndNodes) + "\n>";
+    }
+
+    private void toStringRecursive(TrieNode node,
+	    SortedMap<String, T> map, StringBuilder stringBuilder) {
+	if (node.value != null) {
+	    map.put(stringBuilder.toString(), node.value);
+	}
+	for (Entry<Character, TrieNode> entry : node.next.entrySet()) {
+	    toStringRecursive(entry.getValue(), map, new StringBuilder(stringBuilder).append(entry.getKey()));
+	}
     }
 
     /**

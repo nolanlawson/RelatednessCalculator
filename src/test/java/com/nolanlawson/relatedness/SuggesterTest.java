@@ -25,8 +25,8 @@ public class SuggesterTest {
 	testSuggestions(10, "great", "great-aunt", "great-grandchild", "great-granddaughter", 
 		"great-grandma", "great-grandpa", "great-grandparent", "great-grandson", "great-nephew",
 		"great-niece", "great-uncle");
-	testSuggestions(10, "half", "half-fourth cousin", "half-sibling", "half-second cousin", "half-cousin", 
-		"half-niece", "half-fifth cousin", "half-uncle", "half-nephew", "half-aunt", "half-third cousin");
+	testSuggestions(10, "half", "half-great-niece", "half-sibling", "half-great-aunt", "half-second cousin", 
+		"half-cousin", "half-niece", "half-uncle", "half-nephew", "half-aunt", "half-great-nephew");
 	testSuggestions(10, "", "grandchild", "child", "grandpa", "granddaughter", "daughter", "grandparent", 
 		"cousin", "aunt", "grandma", "father");
 	testSuggestions(10, "grandpa", "grandpa's great-aunt", "grandpa's aunt", "grandpa's grandparent", 
@@ -43,7 +43,24 @@ public class SuggesterTest {
 	testSuggestions(1, "first cousin tw", "first cousin twice removed");
 	testSuggestions(1, "second cousin o", "second cousin once removed");
 	testSuggestions(2, "cousin", "cousin", "cousin's child");
+    }
+    
+    @Test
+    public void testSuggestions2() {
+	testSuggestions(1, "great unc", "great uncle");
+	testSuggestions(1, "great-unc", "great-uncle");
+	testSuggestions(1, "great great unc", "great great uncle");
+	testSuggestions(1, "great half great unc");
+	testSuggestions(1, "half great half unc");
+	testSuggestions(1, "great great half au", "great great half aunt");
+	testSuggestions(1, "half great great au", "half great great aunt");
+	testSuggestions(1, "great great half unc", "great great half uncle");
+	testSuggestions(1, "half great great unc", "half great great uncle");
 	
+	testSuggestions(1, "great-great-half-au", "great-great-half-aunt");
+	testSuggestions(1, "half-great-great-au", "half-great-great-aunt");
+	testSuggestions(1, "great-great-half-unc", "great-great-half-uncle");
+	testSuggestions(1, "half-great-great-unc", "half-great-great-uncle");	
     }
     
     private void testSuggestions(int limit, String input, String... outputs) {
