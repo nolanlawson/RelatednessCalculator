@@ -43,6 +43,7 @@ public class SuggesterTest {
 	testSuggestions(1, "first cousin tw", "first cousin twice removed");
 	testSuggestions(1, "second cousin o", "second cousin once removed");
 	testSuggestions(2, "cousin", "cousin", "cousin's child");
+	testSuggestions(2, "cousin ", "cousin once removed", "cousin twice removed");
     }
     
     @Test
@@ -61,6 +62,7 @@ public class SuggesterTest {
 	testSuggestions(1, "half-great-great-au", "half-great-great-aunt");
 	testSuggestions(1, "great-great-half-unc", "great-great-half-uncle");
 	testSuggestions(1, "half-great-great-unc", "half-great-great-uncle");	
+	testSuggestions(1, "great-great-great-half-aunt", "great-great-great-half-aunt");
     }
     
     private void testSuggestions(int limit, String input, String... outputs) {

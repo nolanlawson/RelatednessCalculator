@@ -173,13 +173,24 @@ public class RelationSuggester {
 		trie.getAll(input.toLowerCase()),
 		WeightedRelation.fromTrieLeafFunction));
 
+	// get the weight of the shortest string.  This is used to 
+	// de-prioritze all compound relations relative to the input non-compound relation
+	// e.g so we get "grandpa" and "grandparent" before "grandpa's X"
+	double originalWeight = result.isEmpty() ? 0.5 : Ordering.natural().onResultOf(new Function<WeightedRelation, Integer>(){
+	    
+	    public Integer apply(WeightedRelation input) {
+		return input.getRelation().length();
+	    }
+	    
+	}).min(result).getWeight() / 2;
+	
 	if (Iterables.contains(Iterables.transform(result,
 		WeightedRelation.getRelationFunction), input.toLowerCase())) {
 	    // there's very few results and it contains the same name as the
 	    // input (e.g. "grandpa"), so expand it with
 	    // possible additional relations, such as "grandpa's cousin" or
 	    // "grandpa's second cousin"
-	    result.addAll(expandWithCompoundRelations(0, input, "", limit));
+	    result.addAll(expandWithCompoundRelations(0, input, "", limit, originalWeight));
 	}
 	// also account for cases where the user has just typed "'", "'s", or
 	// "'s "
@@ -188,7 +199,7 @@ public class RelationSuggester {
 	    if (input.endsWith(fullPossessive.substring(0,
 		    fullPossessive.length() - i))) {
 		result.addAll(expandWithCompoundRelations(
-			fullPossessive.length() - i, input, "", limit));
+			fullPossessive.length() - i, input, "", limit, originalWeight));
 	    }
 	}
 	// next, account for cases where the user typed 's plus something else
@@ -200,7 +211,7 @@ public class RelationSuggester {
 	    String postPossessiveString = input.substring(endOfLastPossessive);
 	    result.addAll(expandWithCompoundRelations(0,
 		    input.substring(0, lastIndexOfPossessive),
-		    postPossessiveString, limit));
+		    postPossessiveString, limit, originalWeight));
 	}
 
 	// sort, limit, and transform
@@ -212,7 +223,7 @@ public class RelationSuggester {
 
     private List<WeightedRelation> expandWithCompoundRelations(
 	    final int possessiveStringIndex, final String input,
-	    String searchString, int limit) {
+	    String searchString, int limit, final double originalWeight) {
 
 	final String fullPossessive = ParseVocabulary.POSSESSIVE + " ";
 
@@ -234,10 +245,7 @@ public class RelationSuggester {
 					+ fullPossessive
 						.substring(possessiveStringIndex)
 					+ weightedRelation.getRelation();
-				double weight = weightedRelation.getWeight() / 2; // cut
-										  // it
-										  // in
-										  // half
+				double weight = weightedRelation.getWeight() * originalWeight; // reduce the weight
 										  // for
 										  // compound
 										  // relations

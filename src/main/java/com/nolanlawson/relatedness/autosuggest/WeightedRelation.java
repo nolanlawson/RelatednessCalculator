@@ -48,6 +48,13 @@ public class WeightedRelation implements Comparable<WeightedRelation> {
 	}
     };
     
+    public static Function<WeightedRelation, Double> getWeightFunction = new Function<WeightedRelation, Double>() {
+
+	public Double apply(WeightedRelation input) {
+	    return input.getWeight();
+	}
+    };
+    
     public static Function<TrieLeaf<Double>, WeightedRelation> fromTrieLeafFunction = 
 	    new Function<TrieLeaf<Double>, WeightedRelation>() {
 
