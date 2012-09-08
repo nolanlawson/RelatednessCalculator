@@ -75,7 +75,6 @@ public class RelationSuggester {
 
     public RelationSuggester() {
 	initTrie();
-	System.out.println(trie.toString());
     }
 
     private void initTrie() {
