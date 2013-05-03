@@ -14,6 +14,8 @@ License
 Summary
 ------------
 
+![Screenshot][5]
+
 Java library for calculating the relatedness between two individuals, e.g. brother-sister (0.5), 
 parent-child (0.5), grandparent-grandchild (0.25), cousin-cousin (0.125), etc. Calculates 
 the degree of relatedness and the relatedness coefficient, as described 
@@ -79,3 +81,4 @@ in _The Selfish Gene_.
 [2]: http://en.wikipedia.org/wiki/Coefficient_of_relationship
 [3]: http://apps.nolanlawson.com/relatedness-calculator/
 [4]: https://github.com/nolanlawson/RelatednessCalculatorInterface
+[5]: http://nolanwlawson.files.wordpress.com/2011/04/relatedness_calculator_version_2.png?w=600
