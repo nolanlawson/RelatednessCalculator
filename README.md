@@ -68,8 +68,6 @@ RelatednessCalculator.calculate(relation).getCoefficient(); // returns 0.015625
 Calculate the same relation using plain English:
 
 ```java
-
-
 RelatednessCalculator.calculate(RelativeNameParser.parse(
         "grandma's cousin's daughter").getRelation()).getCoefficient(); // returns 0.015625
         
