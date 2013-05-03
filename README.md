@@ -34,40 +34,10 @@ Demo
 
 A [live version of the Grails frontend app][3] is available to demonstrate the functionality.
 
-Frontend code
---------------
-
-This code is a Java backend to the [Relatedness Calculator Interface][4] Grails app.
-
 Download
 ----------
 
 Get the latest JAR [here][6]. 
-
-Maven usage
------------
-
-Download the code, build, and install it:
-
-```
-git clone https://github.com/nolanlawson/RelatednessCalculator
-cd RelatednessCalculator
-mvn install
-```
-
-Then just add the following dependency to your ```pom.xml```:
-
-```xml
-<dependencies>
-  ...
-  <dependency>
-  	<groupId>com.nolanlawson.relatedness</groupId>
-  	<artifactId>relatedness-calculator</artifactId>
-  	<version>1.0</version>
-  </dependency>
-  ...
-</dependencies>
-```
 
 Usage
 ----------
@@ -116,6 +86,36 @@ RelativeNameParser.parse("second cousin", true).getGraph().drawGraph();
 ```
 
 You can also see the unit tests for other ideas about how to use the code.
+
+Frontend code
+--------------
+
+This code is a Java backend to the [Relatedness Calculator Interface][4] Grails app.
+
+Maven usage
+-----------
+
+Download the code, build, and install it:
+
+```
+git clone https://github.com/nolanlawson/RelatednessCalculator
+cd RelatednessCalculator
+mvn install
+```
+
+Then just add the following dependency to your ```pom.xml```:
+
+```xml
+<dependencies>
+  ...
+  <dependency>
+    <groupId>com.nolanlawson.relatedness</groupId>
+  	<artifactId>relatedness-calculator</artifactId>
+  	<version>1.0</version>
+  </dependency>
+  ...
+</dependencies>
+```
 
 Credits
 -----------
