@@ -1,13 +1,36 @@
 Relatedness Calculator
 =========================
 
-Simple tool to calculate the relatedness between two individuals, e.g. brother-sister (0.5), 
+Developer
+-----------
+
+Nolan Lawson
+
+License
+-----------
+
+[WTFPL][1], but attribution would be nice.
+
+Summary
+------------
+
+Java library for calculating the relatedness between two individuals, e.g. brother-sister (0.5), 
 parent-child (0.5), grandparent-grandchild (0.25), cousin-cousin (0.125), etc. Calculates 
 the degree of relatedness and the relatedness coefficient, as described 
 in [this Wikipedia page][2].
 
 Inspired by a dude on a message board wondering if it was cool for 
-him to be dating his dad's second cousin.
+him to be dating his dad's second cousin.  (Answer: it's probably okay.)
+
+Demo
+-----------
+
+A [live version of the Grails frontend app][3] is available to demonstrate the functionality.
+
+Frontend Code
+--------------
+
+This code is a Java backend to the [Relatedness Calculator Interface][4] Grails app.
 
 Installation
 ----------
@@ -37,22 +60,22 @@ Then add the following to your pom.xml:
 Usage
 ----------
 
-See the unit tests to get an idea of how to use the code.
+Calculate the relatedness coefficient between a brother and sister:
 
-Developer
------------
 
-Nolan Lawson
+```java
+RelatednessCalculator.calculate(BasicRelation.Sibling).getCoefficient(); // returns 0.5
+```
+
+You can also see the unit tests to get an idea of how to use the code.
 
 Credits
 -----------
 Thanks to Richard Dawkins for his easy-to-understand explanation of how to calculate relatedness
 in _The Selfish Gene_.
 
-License
------------
-
-[WTFPL][1].
 
 [1]: http://sam.zoy.org/wtfpl/
 [2]: http://en.wikipedia.org/wiki/Coefficient_of_relationship
+[3]: http://apps.nolanlawson.com/relatedness-calculator/
+[4]: https://github.com/nolanlawson/RelatednessCalculatorInterface
