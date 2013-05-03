@@ -62,8 +62,7 @@ Calculate the relatedness coefficient for a more complex relation, if you know t
 // i.e. they share two ancestors - his 2 great-great-grandparents are her 2 great-grandparents
 Relation relation = new Relation(new CommonAncestor(4, 3), new CommonAncestor(4, 3));
 
-// returns 0.015625
-RelatednessCalculator.calculate(relation).getCoefficient(); // returns
+RelatednessCalculator.calculate(relation).getCoefficient(); // returns 0.015625
 ```
 
 Calculate the same relation using plain English:
