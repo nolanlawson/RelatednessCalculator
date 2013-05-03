@@ -1,6 +1,8 @@
 Relatedness Calculator
 =========================
 
+Current version: 1.0
+
 Developer
 -----------
 
@@ -29,15 +31,20 @@ Demo
 
 A [live version of the Grails frontend app][3] is available to demonstrate the functionality.
 
-Frontend Code
+Frontend code
 --------------
 
 This code is a Java backend to the [Relatedness Calculator Interface][4] Grails app.
 
-Installation
+Download
 ----------
 
-Download the code and install it:
+Get the latest JAR [6][here]. 
+
+Maven usage
+-----------
+
+Download the code, build, and install it:
 
 ```
 git clone https://github.com/nolanlawson/RelatednessCalculator
@@ -45,7 +52,7 @@ cd RelatednessCalculator
 mvn install
 ```
 
-Then add the following to your pom.xml:
+Then just add the following to your pom.xml:
 
 ```xml
 <dependencies>
@@ -82,3 +89,4 @@ in _The Selfish Gene_.
 [3]: http://apps.nolanlawson.com/relatedness-calculator/
 [4]: https://github.com/nolanlawson/RelatednessCalculatorInterface
 [5]: http://nolanwlawson.files.wordpress.com/2011/04/relatedness_calculator_version_2.png?w=600
+[6]: http://nolanlawson.s3.amazonaws.com/dist/com.nolanlawson.relatedness/release/1.0/relatedness-calculator-1.0.jar
