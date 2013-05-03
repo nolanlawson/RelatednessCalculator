@@ -79,7 +79,7 @@ Draw a pretty graph for Graphviz:
 
 ```java
 // returns a Graphviz graph that looks exactly like the picture in this README above
-RelativeNameParser.parse("second cousin", true).getGraph().drawGraph();
+RelativeNameParser.parse("double cousin", true).getGraph().drawGraph();
 ```
 
 You can also see the unit tests for other ideas about how to use the code.
