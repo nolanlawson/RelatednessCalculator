@@ -39,7 +39,7 @@ This code is a Java backend to the [Relatedness Calculator Interface][4] Grails 
 Download
 ----------
 
-Get the latest JAR [6][here]. 
+Get the latest JAR [here][6]. 
 
 Maven usage
 -----------
