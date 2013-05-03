@@ -60,7 +60,7 @@ Then just add the following to your pom.xml:
   <dependency>
   	<groupId>com.nolanlawson.relatedness</groupId>
   	<artifactId>relatedness-calculator</artifactId>
-  	<version>0.0.1-SNAPSHOT</version>
+  	<version>1.0</version>
   </dependency>
   ...
 </dependencies>
