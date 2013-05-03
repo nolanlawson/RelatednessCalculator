@@ -76,7 +76,43 @@ Calculate the relatedness coefficient between a brother and sister:
 RelatednessCalculator.calculate(BasicRelation.Sibling).getCoefficient(); // returns 0.5
 ```
 
-You can also see the unit tests to get an idea of how to use the code.
+Calculate the degree of relation instead:
+
+```java
+RelatednessCalculator.calculate(BasicRelation.Sibling).getAverageDegree(); // returns 2.0
+```
+
+Calculate the relatedness coefficient for a more complex relation, if you know the common ancestor(s):
+
+```java
+// overhead on a message board: "her dad is my grandma's cousin"
+// i.e. they share two ancestors - his 2 great-great-grandparents are her 2 great-grandparents
+Relation relation = new Relation(new CommonAncestor(4, 3), new CommonAncestor(4, 3));
+
+// returns 0.015625
+RelatednessCalculator.calculate(relation).getCoefficient(); // returns
+```
+
+Calculate the same relation using plain English:
+
+```java
+
+
+RelatednessCalculator.calculate(RelativeNameParser.parse(
+        "grandma's cousin's daughter").getRelation()).getCoefficient(); // returns 0.015625
+        
+RelatednessCalculator.calculate(RelativeNameParser.parse(
+        "dad's second cousin").getRelation()).getCoefficient(); //returns 0.015625
+```
+
+Draw a pretty graph for Graphviz:
+
+```java
+// returns a Graphviz graph that looks exactly like the picture in this README above
+RelativeNameParser.parse("second cousin", true).getGraph().drawGraph();
+```
+
+You can also see the unit tests for other ideas about how to use the code.
 
 Credits
 -----------
