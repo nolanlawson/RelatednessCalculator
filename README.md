@@ -18,9 +18,12 @@ Summary
 
 ![Screenshot][5]
 
-Java library for calculating the relatedness between two individuals, e.g. brother-sister (0.5), 
-parent-child (0.5), grandparent-grandchild (0.25), cousin-cousin (0.125), etc. Calculates 
-the degree of relatedness and the relatedness coefficient, as described 
+Java library for calculating the genetic relatedness between two individuals, e.g. brother-sister (0.5), 
+parent-child (0.5), grandparent-grandchild (0.25), cousin-cousin (0.125), or even more exotic relations
+like "dad's second cousin" (0.015625).
+
+Parses common English phrases.  Draws [Graphviz][7] graphs.
+Calculates both the degree of relatedness and the relatedness coefficient, as described 
 in [this Wikipedia page][2].
 
 Inspired by a dude on a message board wondering if it was cool for 
@@ -52,7 +55,7 @@ cd RelatednessCalculator
 mvn install
 ```
 
-Then just add the following to your pom.xml:
+Then just add the following dependency to your ```pom.xml```:
 
 ```xml
 <dependencies>
@@ -126,3 +129,4 @@ in _The Selfish Gene_.
 [4]: https://github.com/nolanlawson/RelatednessCalculatorInterface
 [5]: http://nolanwlawson.files.wordpress.com/2011/04/relatedness_calculator_version_2.png?w=600
 [6]: http://nolanlawson.s3.amazonaws.com/dist/com.nolanlawson.relatedness/release/1.0/relatedness-calculator-1.0.jar
+[7]: http://www.graphviz.org/
